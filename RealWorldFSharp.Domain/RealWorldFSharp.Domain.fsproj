@@ -5,8 +5,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Common.fs" />
-        <Compile Include="Errors.fs" />
+        <Compile Include="Domain.fs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
     </ItemGroup>
 
 </Project>

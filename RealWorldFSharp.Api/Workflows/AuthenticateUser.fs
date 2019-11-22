@@ -7,7 +7,7 @@ open RealWorldFSharp.Api.Models.Request
 open RealWorldFSharp.Api.Models.Response
 open RealWorldFSharp.Api.Models
 open RealWorldFSharp.Api.Authentication
-open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Domain
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 

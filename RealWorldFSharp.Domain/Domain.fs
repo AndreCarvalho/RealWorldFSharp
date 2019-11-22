@@ -1,15 +1,15 @@
-namespace RealWorldFSharp.Api.Domain
+﻿namespace RealWorldFSharp
 
-open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Common
 
-module Users =
-
+module Domain =
+    
     type Username = private Username of string
         with
         member this.Value = match this with Username un -> un
         static member create fieldName username =
-            if Common.isNullOrEmpty username then
+            if isNullOrEmpty username then
                 validationError fieldName "username must not be null or empty"
             else
                 Ok <| Username username
@@ -46,5 +46,3 @@ module Users =
         Username: Username
         EmailAddress: EmailAddress
     }
-    
-    

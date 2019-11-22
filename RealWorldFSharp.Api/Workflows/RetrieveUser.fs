@@ -5,7 +5,7 @@ open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api.Models.Response
 open RealWorldFSharp.Api.Authentication
-open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Domain
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open FsToolkit.ErrorHandling

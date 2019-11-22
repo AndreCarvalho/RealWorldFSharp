@@ -6,11 +6,9 @@ open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api
 open RealWorldFSharp.CommandModels
-open RealWorldFSharp.Api.Models.Request
 open RealWorldFSharp.Api.Models.Response
-open RealWorldFSharp.Api.Models
+open RealWorldFSharp.Domain
 open RealWorldFSharp.Api.Authentication
-open RealWorldFSharp.Api.Domain.Users
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 
