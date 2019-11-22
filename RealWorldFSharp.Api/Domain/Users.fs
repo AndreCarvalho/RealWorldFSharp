@@ -1,7 +1,7 @@
-namespace Api.Domain
+namespace RealWorldFSharp.Api.Domain
 
-open Api
-open Errors
+open RealWorldFSharp.Api
+open RealWorldFSharp.Common.Errors
 
 module Users =
 

@@ -1,18 +1,16 @@
-namespace Api.Workflows
+namespace RealWorldFSharp.Api.Workflows
 
-open Api
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
-open Api.Models.Response
-open Api.Authentication
-open Api.DataAccess
-open Api.Domain.Users
-open Api.Settings
-open Api.Errors
-open Api.Models.Request
-open Api.Models.Response
 open FsToolkit.ErrorHandling
-open FsToolkit.ErrorHandling
+open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.Api.Authentication
+open RealWorldFSharp.Api.DataAccess
+open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Api.Settings
+open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.Api.Models.Response
 
 module RetrieveProfile =
     

@@ -1,4 +1,4 @@
-namespace Api
+namespace RealWorldFSharp.Api
 
 open Microsoft.AspNetCore.Identity
 open Microsoft.AspNetCore.Identity.EntityFrameworkCore

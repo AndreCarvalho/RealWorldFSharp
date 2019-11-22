@@ -1,4 +1,4 @@
-namespace Api
+namespace RealWorldFSharp.Api
 
 open System
 open System.Text
@@ -12,8 +12,8 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.EntityFrameworkCore
 open Settings
-open Api.Workflows.RegisterNewUser
-open Api.Workflows.AuthenticateUser
+open RealWorldFSharp.Api.Workflows.RegisterNewUser
+open RealWorldFSharp.Api.Workflows.AuthenticateUser
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open Workflows.FollowUser

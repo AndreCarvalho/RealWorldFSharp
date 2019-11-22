@@ -1,20 +1,9 @@
-namespace Api
+namespace RealWorldFSharp.Api
 open System.Collections.Generic
 open System.Collections.ObjectModel
 
 module Models =
     module Request = 
-        [<CLIMutable>]
-        type NewUserInfo = {
-            Username: string
-            Email: string
-            Password: string
-        }
-        
-        [<CLIMutable>]
-        type RegisterNewUser = {
-            User: NewUserInfo
-        }
         
         [<CLIMutable>]
         type AuthenticationData = {

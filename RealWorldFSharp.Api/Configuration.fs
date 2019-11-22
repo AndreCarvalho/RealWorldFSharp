@@ -1,4 +1,4 @@
-namespace Api
+namespace RealWorldFSharp.Api
 
 module Settings =
 

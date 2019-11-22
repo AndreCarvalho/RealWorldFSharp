@@ -1,14 +1,13 @@
-namespace Api.Controllers
+namespace RealWorldFSharp.Api.Controllers
 
-open Api.Errors
-open Api.Models.Request
 open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
-open Api.Workflows.RetrieveUser
-open Api.Workflows.UpdateUser
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
-open Api.ModelsMapping
+open RealWorldFSharp.Api.Http
+open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.Api.Workflows.RetrieveUser
+open RealWorldFSharp.Api.Workflows.UpdateUser
 
 [<Authorize>]
 [<ApiController>]
@@ -30,10 +29,7 @@ type UserController(
         async {
             let! result = retrieveUserWorkflow.Execute userName
             
-            return
-                match result with
-                | Ok user -> (x.Ok user) :> IActionResult
-                | Error _ -> failwith "unexpected error at this level"
+            return result |> resultToActionResult x
         } |> Async.StartAsTask
         
     [<HttpPut>]
@@ -46,13 +42,5 @@ type UserController(
                         
         async {
             let! result = updateUserWorkflow.Execute(userName, updateUser.User)
-            
-            return
-                match result with
-                | Ok user -> (x.Ok user) :> IActionResult
-                | Error error ->
-                    match error with
-                    | UsersError er -> x.BadRequest(mapUsersError er) :> IActionResult
-                    | ValidationError er -> x.BadRequest(mapValidationError er) :> IActionResult
-                    | _ -> failwith "unexpected error case"
+            return result |> resultToActionResult x
         } |> Async.StartAsTask

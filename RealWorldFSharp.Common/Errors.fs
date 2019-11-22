@@ -1,4 +1,4 @@
-namespace Api
+﻿namespace RealWorldFSharp.Common
 
 module Errors =
     type ValidationError =

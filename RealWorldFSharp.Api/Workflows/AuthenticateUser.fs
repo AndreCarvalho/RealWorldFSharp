@@ -1,15 +1,15 @@
-namespace Api.Workflows
+namespace RealWorldFSharp.Api.Workflows
 
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
-open Api.Models.Request
-open Api.Models.Response
-open Api.Models
-open Api.Authentication
-open Api.Domain.Users
-open Api.Settings
-open Api.Errors
 open FsToolkit.ErrorHandling
+open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.Api.Models
+open RealWorldFSharp.Api.Authentication
+open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Api.Settings
+open RealWorldFSharp.Common.Errors
 
 module AuthenticateUser =
     type AuthenticateUserWorkflow(

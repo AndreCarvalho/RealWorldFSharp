@@ -1,14 +1,13 @@
-namespace Api.Controllers
+namespace RealWorldFSharp.Api.Controllers
 
 open System.Security.Claims
-open Api.Errors
 open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
-open Api.ModelsMapping
-open Api.Workflows.FollowUser
-open Api.Workflows.RetrieveProfile
-open Api.Workflows.UnfollowUser
+open RealWorldFSharp.Api.Http
+open RealWorldFSharp.Api.Workflows.FollowUser
+open RealWorldFSharp.Api.Workflows.RetrieveProfile
+open RealWorldFSharp.Api.Workflows.UnfollowUser
 
 [<Authorize>]
 [<ApiController>]
@@ -30,14 +29,7 @@ type ProfilesController(
                                 
         async {
             let! result = retrieveProfileWorkflow.Execute(currentUserName, userName)
-            
-            return
-                match result with
-                | Ok profile -> (x.Ok profile) :> IActionResult
-                | Error err ->
-                    match err with
-                    | UsersError er -> x.BadRequest(mapUsersError er) :> IActionResult
-                    | _ -> failwith "unexpected error case"
+            return result |> resultToActionResult x
         } |> Async.StartAsTask
         
     [<HttpPost>]
@@ -50,14 +42,7 @@ type ProfilesController(
                         
         async {
             let! result = followUserWorkflow.Execute(currentUserName, userNameToFollow)
-            
-            return
-                match result with
-                | Ok profile -> (x.Ok profile) :> IActionResult
-                | Error err ->
-                    match err with
-                    | UsersError er -> x.BadRequest(mapUsersError er) :> IActionResult
-                    | _ -> failwith "unexpected error case"
+            return result |> resultToActionResult x
         } |> Async.StartAsTask
         
     [<HttpDelete>]
@@ -70,12 +55,5 @@ type ProfilesController(
                         
         async {
             let! result = unfollowUserWorkflow.Execute(currentUserName, userNameToUnfollow)
-            
-            return
-                match result with
-                | Ok profile -> (x.Ok profile) :> IActionResult
-                | Error err ->
-                    match err with
-                    | UsersError er -> x.BadRequest(mapUsersError er) :> IActionResult
-                    | _ -> failwith "unexpected error case"
+            return result |> resultToActionResult x
         } |> Async.StartAsTask

@@ -1,17 +1,18 @@
-namespace Api.Workflows
+namespace RealWorldFSharp.Api.Workflows
 
 open System
-open Api
+open FsToolkit.ErrorHandling
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
-open Api.Models.Request
-open Api.Models.Response
-open Api.Models
-open Api.Authentication
-open Api.Domain.Users
-open Api.Settings
-open Api.Errors
-open FsToolkit.ErrorHandling
+open RealWorldFSharp.Api
+open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.Api.Models
+open RealWorldFSharp.Api.Authentication
+open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Api.Settings
+open RealWorldFSharp.Common.Errors
 
 module RegisterNewUser =
     
@@ -19,7 +20,7 @@ module RegisterNewUser =
                                     userManager: UserManager<IdentityUser>,
                                     jwtOption: IOptions<JwtConfiguration>
                                 ) =
-        member __.Execute(command: Request.RegisterNewUser) =
+        member __.Execute(command: RegisterNewUser) =
             let registerNewUser user password =
                 async {
                     let! res = userManager.CreateAsync(user, password) |> Async.AwaitTask

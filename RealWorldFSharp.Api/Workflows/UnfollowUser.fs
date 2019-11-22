@@ -1,10 +1,10 @@
-namespace Api.Workflows
+namespace RealWorldFSharp.Api.Workflows
 
-open Api.DataAccess
-open Microsoft.AspNetCore.Identity
-open Api.Models.Response
-open Api.Errors
+open RealWorldFSharp.Api.DataAccess
 open FsToolkit.ErrorHandling
+open Microsoft.AspNetCore.Identity
+open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.Common.Errors
 
 module UnfollowUser =
     type UnfollowUserWorkflow(

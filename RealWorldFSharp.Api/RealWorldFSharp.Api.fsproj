@@ -6,13 +6,13 @@
 
     <ItemGroup>
         <Compile Include="Common.fs" />
-        <Compile Include="Errors.fs" />
         <Compile Include="Domain\Users.fs" />
         <Compile Include="Configuration.fs" />
         <Compile Include="DataAccess.fs" />
         <Compile Include="Models.fs" />
         <Compile Include="ModelsMapping.fs" />
         <Compile Include="Authentication.fs" />
+        <Compile Include="Http.fs" />
         <Compile Include="Workflows\RegisterNewUser.fs" />
         <Compile Include="Workflows\AuthenticateUser.fs" />
         <Compile Include="Workflows\RetrieveUser.fs" />
@@ -38,6 +38,11 @@
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.0.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.0.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
+      <ProjectReference Include="..\RealWorldFSharp\RealWorldFSharp.fsproj" />
     </ItemGroup>
 
 </Project>

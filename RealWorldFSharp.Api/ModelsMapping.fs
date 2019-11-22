@@ -1,8 +1,8 @@
-namespace Api
+namespace RealWorldFSharp.Api
 
 open System.Collections.Generic
-open Api.Errors
-open Api.Models.Response
+open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Api.Models.Response
 
 module ModelsMapping =
     

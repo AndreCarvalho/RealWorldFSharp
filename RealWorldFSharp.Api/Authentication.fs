@@ -1,8 +1,8 @@
-namespace Api.Authentication
+namespace RealWorldFSharp.Api.Authentication
 
 open System
-open Api.Domain.Users
-open Api.Settings
+open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Api.Settings
 open Microsoft.IdentityModel.Tokens
 open System.IdentityModel.Tokens.Jwt
 open System.Security.Claims

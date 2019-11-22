@@ -1,13 +1,13 @@
-namespace Api.Workflows
+namespace RealWorldFSharp.Api.Workflows
 
-open Api
+open RealWorldFSharp.Api
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
-open Api.Models.Response
-open Api.Authentication
-open Api.Domain.Users
-open Api.Settings
-open Api.Errors
+open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.Api.Authentication
+open RealWorldFSharp.Api.Domain.Users
+open RealWorldFSharp.Api.Settings
+open RealWorldFSharp.Common.Errors
 open FsToolkit.ErrorHandling
 
 module RetrieveUser =

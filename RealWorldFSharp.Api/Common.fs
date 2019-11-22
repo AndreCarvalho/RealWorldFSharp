@@ -1,4 +1,4 @@
-namespace Api
+namespace RealWorldFSharp.Api
 
 [<AutoOpen>]
 module Common =
