@@ -5,12 +5,11 @@ open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Domain
-open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.QueryModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Api.Models.Request
-open RealWorldFSharp.Api.Models.Response
 
 module UpdateUser =
     
@@ -65,19 +64,13 @@ module UpdateUser =
                     Username = userName
                     EmailAddress = emailAddress
                     Id = userId
+                    Bio = None
+                    Image = None
                 }
                 
                 let token = Authentication.createToken jwtOptions.Value user
                 
-                return {
-                    User = {
-                        Username = userName.Value
-                        Email = emailAddress.Value
-                        Bio = null
-                        Image = null
-                        Token = token                        
-                    }
-                }
+                return user |> toUserResponse token
             }    
             
 

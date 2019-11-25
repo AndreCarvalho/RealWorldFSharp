@@ -5,7 +5,17 @@
     </PropertyGroup>
     
     <ItemGroup>
+        <Compile Include="Domain.fs" />
         <Compile Include="CommandModels.fs" />
+        <Compile Include="QueryModels.fs" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="FsToolkit.ErrorHandling" Version="1.2.5" />
     </ItemGroup>
 
 </Project>

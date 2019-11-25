@@ -3,7 +3,7 @@ namespace RealWorldFSharp.Api
 open System.Collections.Generic
 open Microsoft.AspNetCore.Mvc
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.QueryModels
 
 module Http =
     

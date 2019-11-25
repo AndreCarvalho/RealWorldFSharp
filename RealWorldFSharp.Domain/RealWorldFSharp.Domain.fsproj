@@ -5,10 +5,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Domain.fs" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
     </ItemGroup>
 

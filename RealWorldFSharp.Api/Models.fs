@@ -32,24 +32,7 @@ module Models =
         
     module Response =
         
-        [<CLIMutable>]
-        type Errors = {
-            Errors: Dictionary<string, string array>
-        }
-        
-        [<CLIMutable>]
-        type User = {
-            Username: string
-            Email: string
-            Token: string
-            Bio: string
-            Image: string
-        }
-        
-        [<CLIMutable>]
-        type UserResponse = {
-            User: User
-        }
+
 
         [<CLIMutableAttribute>]
         type Profile = {

@@ -41,8 +41,15 @@ module Domain =
             else
                 Ok <| Password password
 
-    type User = {
+    // TODO: proper domain types
+    type Bio = string
+    type Image = string
+    
+    
+    type UserInfo = {
         Id: UserId
         Username: Username
         EmailAddress: EmailAddress
+        Bio: Bio option
+        Image: Image option
     }

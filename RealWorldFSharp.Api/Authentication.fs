@@ -10,15 +10,15 @@ open RealWorldFSharp.Api.Settings
 
 module Authentication =
     
-    let createToken (config: JwtConfiguration) (user: User) =
+    let createToken (config: JwtConfiguration) (userInfo: UserInfo) =
         let tokenHandler = new JwtSecurityTokenHandler()
         let key = Encoding.ASCII.GetBytes config.Secret
         
         let jwToken = new JwtSecurityToken(
                                               claims = [
-                                                  new Claim(ClaimTypes.Email, user.EmailAddress.Value);
-                                                  new Claim(ClaimTypes.Name, user.Username.Value);
-                                                  new Claim(ClaimTypes.NameIdentifier, user.Id.Value);
+                                                  new Claim(ClaimTypes.Email, userInfo.EmailAddress.Value);
+                                                  new Claim(ClaimTypes.Name, userInfo.Username.Value);
+                                                  new Claim(ClaimTypes.NameIdentifier, userInfo.Id.Value);
                                               ],
                                               issuer = config.Issuer,
                                               audience = config.Audience,

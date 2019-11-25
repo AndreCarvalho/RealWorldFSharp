@@ -8,7 +8,6 @@
         <Compile Include="Configuration.fs" />
         <Compile Include="DataAccess.fs" />
         <Compile Include="Models.fs" />
-        <Compile Include="ModelsMapping.fs" />
         <Compile Include="Authentication.fs" />
         <Compile Include="Http.fs" />
         <Compile Include="Workflows\RegisterNewUser.fs" />
@@ -40,7 +39,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
-      <ProjectReference Include="..\RealWorldFSharp.Domain\RealWorldFSharp.Domain.fsproj" />
       <ProjectReference Include="..\RealWorldFSharp\RealWorldFSharp.fsproj" />
     </ItemGroup>
 

@@ -4,7 +4,7 @@ open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Api.Models.Request
-open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.QueryModels
 open RealWorldFSharp.Api.Models
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Domain
@@ -42,6 +42,8 @@ module AuthenticateUser =
                         Username = userName 
                         EmailAddress = emailAddress
                         Id = userId
+                        Bio = None
+                        Image = None
                     }
                 }
                 
@@ -53,13 +55,5 @@ module AuthenticateUser =
                 let! user = mapToUser identityUser |> expectValidationError
                 let token = Authentication.createToken jwtOptions.Value user
                 
-                return {
-                    User = {
-                        Username = user.Username.Value
-                        Email = user.EmailAddress.Value
-                        Bio = null
-                        Image = null
-                        Token = token                        
-                    }
-                }
+                return user |> toUserResponse token
             }

@@ -6,7 +6,7 @@ open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api
 open RealWorldFSharp.CommandModels
-open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.QueryModels
 open RealWorldFSharp.Domain
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
@@ -18,47 +18,31 @@ module RegisterNewUser =
                                     userManager: UserManager<IdentityUser>,
                                     jwtOption: IOptions<JwtConfiguration>
                                 ) =
-        member __.Execute(command: RegisterNewUser) =
+        member __.Execute(command: RegisterNewUserCommandModel) =
             let registerNewUser user password =
                 async {
                     let! res = userManager.CreateAsync(user, password) |> Async.AwaitTask
                     
                     if res.Succeeded then
-                        let! userId = userManager.GetUserIdAsync(user) |> Async.AwaitTask
-                        return UserId.create "userId" userId |> expectValidationError
+                        return Ok ()
                     else
                         let firstError = res.Errors |> Seq.head
                         return identityError firstError.Code firstError.Description |> expectUsersError 
                 }
                 
             asyncResult {
-                let! userName = Username.create "username" command.User.Username |> expectValidationError
-                let! emailAddress = EmailAddress.create "email" command.User.Email |> expectValidationError
-                let! password = Password.create "password" command.User.Password |> expectValidationError
+                let userId = Guid.NewGuid().ToString()              
+                let! (user, password) = validateRegisterNewUserCommand userId command |> expectValidationError
                 
                 let identityUser = new IdentityUser (
-                                        Id = Guid.NewGuid().ToString(),
-                                        UserName = userName.Value,
-                                        Email = emailAddress.Value
+                                        Id = user.Id.Value,
+                                        UserName = user.Username.Value,
+                                        Email = user.EmailAddress.Value
                                     )
             
-                let! userId = registerNewUser identityUser password.Value
-                
-                let user = {
-                    Username = userName
-                    EmailAddress = emailAddress
-                    Id = userId
-                }
-                
+                do! registerNewUser identityUser password.Value
+                             
                 let token = Authentication.createToken jwtOption.Value user
                 
-                return {
-                    User = {
-                        Username = userName.Value
-                        Email = emailAddress.Value
-                        Bio = null
-                        Image = null
-                        Token = token
-                    }
-                }
+                return user |> toUserResponse token
             }
