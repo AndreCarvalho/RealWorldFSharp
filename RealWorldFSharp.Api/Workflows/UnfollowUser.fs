@@ -5,11 +5,12 @@ open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api.Models.Response
 open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Data.DataEntities
 
 module UnfollowUser =
     type UnfollowUserWorkflow(
                                dbContext: ApplicationDbContext,
-                               userManager: UserManager<IdentityUser>
+                               userManager: UserManager<ApplicationUser>
                            ) =
         member __.Execute(currentUserName, userNameToUnfollow) =
             let getUser userName =
@@ -28,8 +29,8 @@ module UnfollowUser =
                     return ()
                 }
             asyncResult {
-                let! (identityUserToUnfollow: IdentityUser) = getUser userNameToUnfollow
-                let! (currentIdentityUser: IdentityUser) = getUser currentUserName
+                let! (identityUserToUnfollow: ApplicationUser) = getUser userNameToUnfollow
+                let! (currentIdentityUser: ApplicationUser) = getUser currentUserName
                 
                 let query = query {
                     for f in dbContext.UsersFollowing do

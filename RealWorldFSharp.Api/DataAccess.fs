@@ -3,6 +3,7 @@ namespace RealWorldFSharp.Api
 open Microsoft.AspNetCore.Identity
 open Microsoft.AspNetCore.Identity.EntityFrameworkCore
 open Microsoft.EntityFrameworkCore
+open RealWorldFSharp.Data.DataEntities
 
 module DataAccess =
     
@@ -13,7 +14,7 @@ module DataAccess =
     }
     
     type ApplicationDbContext(options:DbContextOptions<ApplicationDbContext>) =
-        inherit IdentityDbContext(options)
+        inherit IdentityDbContext<ApplicationUser, IdentityRole, string>(options)
         
         [<DefaultValue>]
         val mutable usersFollowing: DbSet<UserFollowing>

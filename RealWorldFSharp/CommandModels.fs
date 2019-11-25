@@ -6,6 +6,11 @@ open RealWorldFSharp.Common.Errors
 
 module CommandModels =
     
+    type AuthenticateUserCommand = {
+        EmailAddress: EmailAddress
+        Password: Password
+    }
+    
     [<CLIMutable>]
     type NewUserInfoModel = {
         Username: string
@@ -18,7 +23,19 @@ module CommandModels =
         User: NewUserInfoModel
     }
     
+    [<CLIMutable>]
+    type AuthenticationData = {
+        Email: string
+        Password: string
+    }        
+    
+    [<CLIMutable>]
+    type AuthenticateUserCommandModel = {
+        User: AuthenticationData
+    }
+    
     type ValidateRegisterNewUserCommand = RegisterNewUserCommandModel -> ValidationResult<UserInfo * Password>
+    type ValidateAuthenticateUserCommand = AuthenticateUserCommandModel -> ValidationResult<AuthenticateUserCommand>
 
     let validateRegisterNewUserCommand userId : ValidateRegisterNewUserCommand =
         fun command ->
@@ -35,4 +52,16 @@ module CommandModels =
                     Bio = None
                     Image = None
                 }, password)
+            }
+            
+    let validateAuthenticateUserCommand : ValidateAuthenticateUserCommand =
+        fun command ->
+            result {
+                let! emailAddress = EmailAddress.create "email" command.User.Email
+                let! password = Password.create "password" command.User.Password
+                
+                return {
+                    EmailAddress = emailAddress
+                    Password = password
+                }
             }

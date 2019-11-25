@@ -10,11 +10,12 @@ open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.Data.DataEntities
 
 module UpdateUser =
     
     type UpdateUserWorkflow (
-                                    userManager: UserManager<IdentityUser>,
+                                    userManager: UserManager<ApplicationUser>,
                                     jwtOptions: IOptions<JwtConfiguration>                                
                             ) =
         member __.Execute(userName, updateUserData: UpdateUserData) =

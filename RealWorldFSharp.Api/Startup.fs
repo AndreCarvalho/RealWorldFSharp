@@ -16,6 +16,7 @@ open RealWorldFSharp.Api.Workflows.RegisterNewUser
 open RealWorldFSharp.Api.Workflows.AuthenticateUser
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
+open RealWorldFSharp.Data.DataEntities
 open Workflows.FollowUser
 open Workflows.RetrieveProfile
 open Workflows.RetrieveUser
@@ -31,7 +32,7 @@ type Startup private () =
     member this.ConfigureServices(services: IServiceCollection) =
         services.AddDbContext<ApplicationDbContext>(fun opt -> opt.UseInMemoryDatabase("InMemoryDb") |> ignore) |> ignore
         
-        services.AddIdentity<IdentityUser, IdentityRole>(fun opt ->
+        services.AddIdentity<ApplicationUser, IdentityRole>(fun opt ->
                 opt.User.RequireUniqueEmail <- true 
                 opt.Password.RequireNonAlphanumeric <- false 
                 opt.Password.RequireDigit <- false 

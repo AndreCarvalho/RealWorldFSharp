@@ -39,6 +39,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\RealWorldFSharp.Common\RealWorldFSharp.Common.fsproj" />
+      <ProjectReference Include="..\RealWorldFSharp.Data\RealWorldFSharp.Data.fsproj" />
       <ProjectReference Include="..\RealWorldFSharp\RealWorldFSharp.fsproj" />
     </ItemGroup>
 

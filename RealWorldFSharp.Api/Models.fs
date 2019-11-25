@@ -4,18 +4,7 @@ open System.Collections.ObjectModel
 
 module Models =
     module Request = 
-        
-        [<CLIMutable>]
-        type AuthenticationData = {
-            Email: string
-            Password: string
-        }        
-        
-        [<CLIMutable>]
-        type AuthenticateUser = {
-            User: AuthenticationData
-        }
-        
+                
         [<CLIMutable>]
         type UpdateUserData = {
             Username: string

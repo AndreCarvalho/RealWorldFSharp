@@ -5,12 +5,13 @@ open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api.Models.Response
 open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Data.DataEntities
 
 module FollowUser =
     
     type FollowUserWorkflow(
                                dbContext: ApplicationDbContext,
-                               userManager: UserManager<IdentityUser>
+                               userManager: UserManager<ApplicationUser>
                            ) =
         member __.Execute(currentUserName, userNameToFollow) =
             let getUser userName =
@@ -29,8 +30,8 @@ module FollowUser =
                     return ()
                 }
             asyncResult {
-                let! (identityUserToFollow: IdentityUser) = getUser userNameToFollow
-                let! (currentIdentityUser: IdentityUser) = getUser currentUserName
+                let! (identityUserToFollow: ApplicationUser) = getUser userNameToFollow
+                let! (currentIdentityUser: ApplicationUser) = getUser currentUserName
                 
                 let query = query {
                     for f in dbContext.UsersFollowing do

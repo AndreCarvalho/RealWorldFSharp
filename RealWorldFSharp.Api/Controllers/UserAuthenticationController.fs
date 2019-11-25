@@ -5,6 +5,7 @@ open RealWorldFSharp.Api.Models.Request
 open RealWorldFSharp.Api.Workflows.AuthenticateUser
 open RealWorldFSharp.Api.Http
 open FsToolkit.ErrorHandling
+open RealWorldFSharp.CommandModels
 
 
 [<ApiController>]
@@ -14,7 +15,7 @@ type UserAuthenticationController (authenticateUserWorkflow: AuthenticateUserWor
 
     [<HttpPost>]
     [<Route("login")>]
-    member x.Post(payload: AuthenticateUser) =
+    member x.Post(payload: AuthenticateUserCommandModel) =
         async {
             let! result = authenticateUserWorkflow.Execute payload
             return result |> resultToActionResult x

@@ -48,6 +48,12 @@ module Errors =
             let! result = asyncResult
             return expectDataRelatedError result
         }
+        
+    let expectUsersErrorAsync asyncResult =
+        async {
+            let! result = asyncResult
+            return expectUsersError result
+        }
 
     (*
     Some type aliases for making code more readable and for preventing
@@ -57,5 +63,6 @@ module Errors =
     type AsyncResult<'a, 'error> = Async<Result<'a, 'error>>
     type ValidationResult<'a> = Result<'a, ValidationError>
     type IoResult<'a> = AsyncResult<'a, DataRelatedError>
+    type UserIdentityResult<'a> = AsyncResult<'a, UsersError>
     type PipelineResult<'a> = AsyncResult<'a, Error>
     type IoQueryResult<'a> = Async<'a option>

@@ -9,11 +9,12 @@ open RealWorldFSharp.Domain
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open FsToolkit.ErrorHandling
+open RealWorldFSharp.Data.DataEntities
 
 module RetrieveUser =
     
     type RetrieveUserWorkflow (
-                                    userManager: UserManager<IdentityUser>,
+                                    userManager: UserManager<ApplicationUser>,
                                     jwtOptions: IOptions<JwtConfiguration>
                               ) =
         member __.Execute(userName) =
