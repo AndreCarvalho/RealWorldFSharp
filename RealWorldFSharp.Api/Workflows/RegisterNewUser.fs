@@ -25,5 +25,5 @@ module RegisterNewUser =
                 let! (user, password) = validateRegisterNewUserCommand userId command |> expectValidationError
                 do! DataPipeline.registerNewUser userManager (user, password) |> expectUsersErrorAsync
                 let token = user |> Authentication.createToken jwtOption.Value
-                return user |> toUserResponse token
+                return user |> toUserModelEnvelope token
             }

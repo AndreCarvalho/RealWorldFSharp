@@ -1,7 +1,6 @@
 namespace RealWorldFSharp.Api.Controllers
 
 open Microsoft.AspNetCore.Mvc
-open RealWorldFSharp.Api.Models.Request
 open RealWorldFSharp.Api.Workflows.AuthenticateUser
 open RealWorldFSharp.Api.Http
 open FsToolkit.ErrorHandling
@@ -15,8 +14,8 @@ type UserAuthenticationController (authenticateUserWorkflow: AuthenticateUserWor
 
     [<HttpPost>]
     [<Route("login")>]
-    member x.Post(payload: AuthenticateUserCommandModel) =
+    member x.Post(payload: AuthenticateUserCommandModelEnvelope) =
         async {
-            let! result = authenticateUserWorkflow.Execute payload
+            let! result = authenticateUserWorkflow.Execute payload.User
             return result |> resultToActionResult x
         } |> Async.StartAsTask

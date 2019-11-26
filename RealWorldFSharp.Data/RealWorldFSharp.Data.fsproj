@@ -9,6 +9,7 @@
         <Compile Include="DomainToEntityMapping.fs" />
         <Compile Include="EntityToDomainMapping.fs" />
         <Compile Include="CommandRepository.fs" />
+        <Compile Include="QueryRepository.fs" />
         <Compile Include="DataPipeline.fs" />
     </ItemGroup>
 

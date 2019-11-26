@@ -4,12 +4,14 @@ open RealWorldFSharp.Api
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
+open RealWorldFSharp
 open RealWorldFSharp.Domain
 open RealWorldFSharp.QueryModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Api.Models.Request
+open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities
 
 module UpdateUser =
@@ -18,60 +20,54 @@ module UpdateUser =
                                     userManager: UserManager<ApplicationUser>,
                                     jwtOptions: IOptions<JwtConfiguration>                                
                             ) =
-        member __.Execute(userName, updateUserData: UpdateUserData) =
-            let getUser userName =
-                async {
-                    let! user = userManager.FindByNameAsync userName |> Async.AwaitTask
-                    // TODO: could this be null??
-                    return user
-                }
-                
-            let updateEmail user newEmail =
-                async {
-                    let! res = userManager.SetEmailAsync(user, newEmail) |> Async.AwaitTask
-                    if res.Succeeded then
-                        return Ok ()
-                    else
-                        let firstError = res.Errors |> Seq.head
-                        return identityError firstError.Code firstError.Description |> expectUsersError 
-                }
-                
-            let updateUsername user newUsername =
-                async {
-                    let! res = userManager.SetUserNameAsync(user, newUsername) |> Async.AwaitTask
-                    if res.Succeeded then
-                        return Ok ()
-                    else
-                        let firstError = res.Errors |> Seq.head
-                        return identityError firstError.Code firstError.Description |> expectUsersError 
-                }
-            
+        let tryUpdateUsername command userInfo applicationUser =
+            async {
+                return!
+                    match command.Username with
+                    | Some newUsername -> DataPipeline.updateUserUsername userManager (applicationUser, newUsername)
+                    | None -> AsyncResult.retn userInfo
+            }
+        
+        let tryUpdateEmailAddress command userInfo applicationUser =
+            async {
+                return!
+                    match command.EmailAddress with
+                    | Some newEmailAddress -> DataPipeline.updateUserEmailAddress userManager (applicationUser, newEmailAddress)
+                    | None -> AsyncResult.retn userInfo
+            }        
+        let tryUpdateUser command userInfo (applicationUser:ApplicationUser) =
             asyncResult {
-                let! identityUser = getUser userName
-
-                if not <| isNull updateUserData.Username then
-                    let! newUsername = Username.create "username" updateUserData.Username |> expectValidationError
-                    do! updateUsername identityUser newUsername.Value
+                let userInfo:UserInfo =
+                    match command.Bio with
+                    | Some newBio ->
+                        applicationUser.Bio <- newBio
+                        { userInfo with Bio = Some newBio}
+                    | None -> userInfo   
+                let userInfo:UserInfo =
+                    match command.Image with
+                    | Some newImage ->
+                        applicationUser.ImageUrl <- newImage
+                        { userInfo with Image = Some newImage}
+                    | None -> userInfo
                     
-                if not <| isNull updateUserData.Email then
-                    let! newEmailAddress = EmailAddress.create "email" updateUserData.Email |> expectValidationError
-                    do! updateEmail identityUser newEmailAddress.Value                
+                if command.Bio.IsSome || command.Image.IsSome then
+                    do! DataPipeline.updateUserInfo userManager applicationUser
                     
-                let! userName = Username.create "username" identityUser.UserName |> expectValidationError
-                let! emailAddress = EmailAddress.create "email" identityUser.Email |> expectValidationError
-                let! userId = UserId.create "id" identityUser.Id |> expectValidationError
+                return userInfo
+            }
+        
+        member __.Execute(username, commandModel: UpdateUserCommandModel) =
+            asyncResult {
+                let! command = CommandModels.validateUpdateUserCommand commandModel |> expectValidationError
+                let! username = Username.create "username" username |> expectValidationError
 
-                let user = {
-                    Username = userName
-                    EmailAddress = emailAddress
-                    Id = userId
-                    Bio = None
-                    Image = None
-                }
+                let! userInfoOption = DataPipeline.getUserInfo userManager username
+                let! (userInfo, applicationUser) = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
                 
-                let token = Authentication.createToken jwtOptions.Value user
+                let! userInfo = tryUpdateUsername command userInfo applicationUser |> expectUsersErrorAsync
+                let! userInfo = tryUpdateEmailAddress command userInfo applicationUser |> expectUsersErrorAsync
+                let! userInfo = tryUpdateUser command userInfo applicationUser |> expectUsersErrorAsync
                 
-                return user |> toUserResponse token
+                let token = Authentication.createToken jwtOptions.Value userInfo
+                return userInfo |> toUserModelEnvelope token
             }    
-            
-

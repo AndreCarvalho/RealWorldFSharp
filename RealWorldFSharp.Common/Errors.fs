@@ -54,6 +54,14 @@ module Errors =
             let! result = asyncResult
             return expectUsersError result
         }
+        
+    let noneToError (a: 'a option) id =
+        let error = EntityNotFound (sprintf "%sEntity" typeof<'a>.Name, id)
+        Result.ofOption error a
+
+    let noneToUserNotFoundError (a: 'a option) username =
+        let error = UserNotFound username
+        Result.ofOption error a
 
     (*
     Some type aliases for making code more readable and for preventing
@@ -66,3 +74,4 @@ module Errors =
     type UserIdentityResult<'a> = AsyncResult<'a, UsersError>
     type PipelineResult<'a> = AsyncResult<'a, Error>
     type IoQueryResult<'a> = Async<'a option>
+    

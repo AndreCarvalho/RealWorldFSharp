@@ -1,5 +1,6 @@
 namespace RealWorldFSharp
 
+open System
 open System.Collections.Generic
 open RealWorldFSharp.Domain
 
@@ -11,7 +12,7 @@ module QueryModels =
     }
     
     [<CLIMutable>]
-    type User = {
+    type UserModel = {
         Username: string
         Email: string
         Token: string
@@ -20,15 +21,40 @@ module QueryModels =
     }
     
     [<CLIMutable>]
-    type UserResponse = {
-        User: User
+    type UserModelEnvelope = {
+        User: UserModel
+    }
+    
+    [<CLIMutableAttribute>]
+    type ProfileModel = {
+        Username: string
+        Bio: string
+        Image: string
+        Following: Nullable<bool>
+    }
+    
+    [<CLIMutable>]
+    type ProfileModelEnvelope = {
+        Profile: ProfileModel
     }
 
-    let toUserResponse token (userInfo: UserInfo) =
+    let toUserModelEnvelope token (userInfo: UserInfo) =
         {
-            Username = userInfo.Username.Value
-            Email = userInfo.EmailAddress.Value
-            Bio = userInfo.Bio |> Option.defaultValue null
-            Image = userInfo.Image |> Option.defaultValue null
-            Token = token
+            User = {
+                Username = userInfo.Username.Value
+                Email = userInfo.EmailAddress.Value
+                Bio = userInfo.Bio |> Option.defaultValue null
+                Image = userInfo.Image |> Option.defaultValue null
+                Token = token
+            }
+        }
+        
+    let toProfileModelEnvelope (userInfo: UserInfo) =
+        {
+            Profile = {
+                Username = userInfo.Username.Value
+                Bio = userInfo.Bio |> Option.defaultValue null
+                Image = userInfo.Image |> Option.defaultValue null
+                Following = new Nullable<bool>() 
+            }        
         }

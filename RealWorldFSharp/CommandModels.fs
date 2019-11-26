@@ -5,45 +5,67 @@ open Domain
 open RealWorldFSharp.Common.Errors
 
 module CommandModels =
-    
-    type AuthenticateUserCommand = {
-        EmailAddress: EmailAddress
-        Password: Password
-    }
-    
+   
     [<CLIMutable>]
-    type NewUserInfoModel = {
+    type RegisterNewUserCommandModel = {
         Username: string
         Email: string
         Password: string
     }
     
     [<CLIMutable>]
-    type RegisterNewUserCommandModel = {
-        User: NewUserInfoModel
+    type RegisterNewUserCommandModelEnvelope = {
+        User: RegisterNewUserCommandModel
     }
     
     [<CLIMutable>]
-    type AuthenticationData = {
+    type AuthenticateUserCommandModel = {
         Email: string
         Password: string
     }        
     
     [<CLIMutable>]
-    type AuthenticateUserCommandModel = {
-        User: AuthenticationData
+    type AuthenticateUserCommandModelEnvelope = {
+        User: AuthenticateUserCommandModel
     }
+    
+    [<CLIMutable>]
+    type UpdateUserCommandModel = {
+        Bio: string
+        Image: string
+        Email: string
+        Username: string
+    }
+    
+    [<CLIMutable>]
+    type UpdateUserCommandModelEnvelope = {
+        User: UpdateUserCommandModel
+    }
+    
+     type AuthenticateUserCommand = {
+        EmailAddress: EmailAddress
+        Password: Password
+    }
+    
+    type UpdateUserCommand = {
+        Bio: Bio option
+        Image: Image option
+        EmailAddress: EmailAddress option
+        Username: Username option
+    }
+
     
     type ValidateRegisterNewUserCommand = RegisterNewUserCommandModel -> ValidationResult<UserInfo * Password>
     type ValidateAuthenticateUserCommand = AuthenticateUserCommandModel -> ValidationResult<AuthenticateUserCommand>
+    type ValidateUpdateUserCommand = UpdateUserCommandModel -> ValidationResult<UpdateUserCommand>
 
     let validateRegisterNewUserCommand userId : ValidateRegisterNewUserCommand =
         fun command ->
             result {
                 let! userId = UserId.create "userId" userId
-                let! userName = Username.create "username" command.User.Username
-                let! emailAddress = EmailAddress.create "email" command.User.Email
-                let! password = Password.create "password" command.User.Password
+                let! userName = Username.create "username" command.Username
+                let! emailAddress = EmailAddress.create "email" command.Email
+                let! password = Password.create "password" command.Password
                 
                 return ({
                     Username = userName
@@ -57,11 +79,34 @@ module CommandModels =
     let validateAuthenticateUserCommand : ValidateAuthenticateUserCommand =
         fun command ->
             result {
-                let! emailAddress = EmailAddress.create "email" command.User.Email
-                let! password = Password.create "password" command.User.Password
+                let! emailAddress = EmailAddress.create "email" command.Email
+                let! password = Password.create "password" command.Password
                 
                 return {
                     EmailAddress = emailAddress
                     Password = password
                 }
+            }
+            
+    let validateUpdateUserCommand: ValidateUpdateUserCommand =
+        fun command ->
+            result {
+                let! emailAddress = command.Email
+                                    |> Option.ofObj 
+                                    |> Option.map (EmailAddress.create "email")
+                                    |> Option.sequenceResult
+                let! username = command.Username
+                                    |> Option.ofObj 
+                                    |> Option.map (Username.create "username")
+                                    |> Option.sequenceResult
+                                    
+                let bio = command.Bio |> Option.ofObj
+                let image = command.Image |> Option.ofObj
+                
+                return {
+                    Bio = bio
+                    Image = image
+                    EmailAddress = emailAddress
+                    Username = username
+                } 
             }

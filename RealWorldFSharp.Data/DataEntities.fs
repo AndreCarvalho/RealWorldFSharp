@@ -10,5 +10,7 @@ module DataEntities =
         member val Bio:string = null with get, set
         member val ImageUrl:string = null with get, set
 
-    type EmailAddress = { Value: string }
-    type Password = { Value: string }
+    type EmailAddress = string
+    type Password = string
+    type Username = string
+    

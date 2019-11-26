@@ -3,7 +3,8 @@ namespace RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.Api.DataAccess
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open RealWorldFSharp.Api.Models.Response
+open RealWorldFSharp.QueryModels
+open RealWorldFSharp.Common
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
 
@@ -48,7 +49,7 @@ module UnfollowUser =
                         Username = userNameToUnfollow
                         Bio = null
                         Image = null
-                        Following = false
+                        Following = Nullable.from false
                     }
                 }
             }

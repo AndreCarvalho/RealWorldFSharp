@@ -1,5 +1,6 @@
 namespace RealWorldFSharp.Common
 
+
 [<AutoOpen>]
 module Common =
     let inline (|HasLength|) x = 
@@ -19,3 +20,10 @@ module Common =
             let! a = a
             return! f a
         }
+    
+[<RequireQualifiedAccess>]
+module Nullable =
+    open System
+    
+    let from (a:'a) =
+        new Nullable<'a>(a)

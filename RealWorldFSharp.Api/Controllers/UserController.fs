@@ -5,9 +5,9 @@ open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
 open RealWorldFSharp.Api.Http
-open RealWorldFSharp.Api.Models.Request
 open RealWorldFSharp.Api.Workflows.RetrieveUser
 open RealWorldFSharp.Api.Workflows.UpdateUser
+open RealWorldFSharp.CommandModels
 
 [<Authorize>]
 [<ApiController>]
@@ -20,7 +20,7 @@ type UserController(
 
     [<HttpGet>]
     [<Route("")>]
-    member x.Get() =
+    member self.Get() =
         let userName = base.HttpContext.User.Claims
                         |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
                         |> Option.map (fun x -> x.Value)
@@ -29,12 +29,12 @@ type UserController(
         async {
             let! result = retrieveUserWorkflow.Execute userName
             
-            return result |> resultToActionResult x
+            return result |> resultToActionResult self
         } |> Async.StartAsTask
         
     [<HttpPut>]
     [<Route("")>]
-    member x.Put(updateUser: UpdateUser) =
+    member self.Put(updateUser: UpdateUserCommandModelEnvelope) =
         let userName = base.HttpContext.User.Claims
                         |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
                         |> Option.map (fun x -> x.Value)
@@ -42,5 +42,5 @@ type UserController(
                         
         async {
             let! result = updateUserWorkflow.Execute(userName, updateUser.User)
-            return result |> resultToActionResult x
+            return result |> resultToActionResult self
         } |> Async.StartAsTask

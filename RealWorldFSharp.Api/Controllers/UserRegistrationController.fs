@@ -13,9 +13,9 @@ type UserRegistrationController (registerNewUserWorkflow: RegisterNewUserWorkflo
 
     [<HttpPost>]
     [<Route("")>]
-    member x.Post(payload: RegisterNewUserCommandModel) =
+    member x.Post(payload: RegisterNewUserCommandModelEnvelope) =
         async {
-            let! result = registerNewUserWorkflow.Execute payload
+            let! result = registerNewUserWorkflow.Execute payload.User
             return result |> Http.resultToActionResult x
         } |> Async.StartAsTask
         

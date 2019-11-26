@@ -22,5 +22,5 @@ module AuthenticateUser =
                 let! userInfo = DataPipeline.authenticateUser userManager (authCommand.EmailAddress, authCommand.Password)
                                 |> expectUsersErrorAsync
                 let token = Authentication.createToken jwtOptions.Value userInfo
-                return userInfo |> toUserResponse token
+                return userInfo |> toUserModelEnvelope token
             }
