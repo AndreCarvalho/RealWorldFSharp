@@ -14,7 +14,10 @@ module DataPipeline =
     type UpdateUserEmailAddress = (ApplicationUser * EmailAddress) -> UserIdentityResult<UserInfo>
     type UpdateUserUsername = (ApplicationUser * Username) -> UserIdentityResult<UserInfo>
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<unit>
-    
+    type GetUserFollowing = UserId -> IoResult<UserFollowing>
+    type AddUserFollowing = (UserId * UserId) -> IoResult<unit>
+    type RemoveUserFollowing = (UserId * UserId) -> IoResult<unit>
+        
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
             let applicationUser = userInfo |> DomainToEntityMapping.mapUserInfoToApplicationUser
@@ -60,4 +63,24 @@ module DataPipeline =
             async {
                 let! _ = CommandRepository.updateUserInfo userManager applicationUser
                 return Ok ()
+            }
+            
+    let getUserFollowing (dbContext: ApplicationDbContext) : GetUserFollowing =
+        fun userId ->
+            async {
+                let! entity = QueryRepository.getUserFollowing dbContext userId.Value
+                return entity |> Result.map EntityToDomainMapping.mapUserFollowing
+            }
+            
+    let addUserFollowing (dbContext: ApplicationDbContext) : AddUserFollowing =
+        fun (followerId, followedId) ->
+            asyncResult {
+                let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
+                do! CommandRepository.addUserFollowing dbContext userFollowing
+            }            
+    let removeUserFollowing (dbContext: ApplicationDbContext) : RemoveUserFollowing =
+        fun (followerId, followedId) ->
+            asyncResult {
+                let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
+                do! CommandRepository.removeUserFollowing dbContext userFollowing
             }

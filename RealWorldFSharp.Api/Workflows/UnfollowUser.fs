@@ -1,12 +1,13 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open RealWorldFSharp.Api.DataAccess
+open RealWorldFSharp.Data
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
+open Microsoft.EntityFrameworkCore
 open RealWorldFSharp.QueryModels
-open RealWorldFSharp.Common
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Domain
 
 module UnfollowUser =
     type UnfollowUserWorkflow(
@@ -14,43 +15,23 @@ module UnfollowUser =
                                userManager: UserManager<ApplicationUser>
                            ) =
         member __.Execute(currentUserName, userNameToUnfollow) =
-            let getUser userName =
-                async {
-                    let! user = userManager.FindByNameAsync(userName) |> Async.AwaitTask
-                    
-                    if isNull user then
-                        return userNotFoundError userName |> expectUsersError
-                    else
-                        return Ok user
-                }
-            let removeUserFollowing userFollowing =
-                async {
-                    do (dbContext.UsersFollowing.Remove userFollowing) |> ignore
-                    let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
-                    return ()
-                }
             asyncResult {
-                let! (identityUserToUnfollow: ApplicationUser) = getUser userNameToUnfollow
-                let! (currentIdentityUser: ApplicationUser) = getUser currentUserName
+                let! usernameToUnfollow = Username.create "username" userNameToUnfollow |> expectValidationError
+                let currentUsername = Username.create "username" currentUserName |> valueOrException
+
+                let! userInfoOption = DataPipeline.getUserInfo userManager usernameToUnfollow 
+                let! (userInfoToUnfollow, _) = noneToUserNotFoundError userInfoOption usernameToUnfollow.Value |> expectUsersError
                 
-                let query = query {
-                    for f in dbContext.UsersFollowing do
-                    where (f.FollowedId = identityUserToUnfollow.Id && f.FollowerId = currentIdentityUser.Id)
-                    select f
-                    count
-                }
+                let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
                 
-                if query = 1 then                   
-                    let userFollowing = { FollowerId = currentIdentityUser.Id; FollowedId = identityUserToUnfollow.Id } 
-                    do! removeUserFollowing userFollowing
+                dbContext.ChangeTracker.QueryTrackingBehavior <- QueryTrackingBehavior.NoTracking
+                let! userFollowing = DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
                 
-                return {
-                    Profile = {
-                        Username = userNameToUnfollow
-                        Bio = null
-                        Image = null
-                        Following = Nullable.from false
-                    }
-                }
+                let (userFollowing, result) = removeFromUserFollowing userInfoToUnfollow.Id userFollowing
+                if result = Removed then
+                    do! DataPipeline.removeUserFollowing dbContext (currentUserInfo.Id, userInfoToUnfollow.Id) |> expectDataRelatedErrorAsync
+                
+                return userInfoToUnfollow |> toProfileModelEnvelope userFollowing
             }
 

@@ -53,3 +53,24 @@ module Domain =
         Bio: Bio option
         Image: Image option
     }
+    
+    type UserFollowing = {
+        Id: UserId
+        Following: Set<UserId>
+    }
+    
+    type AddUserResult = Added | AlreadyPresent
+    
+    let addToUserFollowing candidateUserId userFollowing =
+        if not <| userFollowing.Following.Contains candidateUserId then
+            ({ userFollowing with Following = userFollowing.Following.Add candidateUserId }, Added)
+        else
+            (userFollowing, AlreadyPresent)
+            
+    type RemoveUserResult = Removed | NotPresent
+    
+    let removeFromUserFollowing userId userFollowing =
+        if userFollowing.Following.Contains userId then
+            ({ userFollowing with Following = userFollowing.Following.Remove userId }, Removed)
+        else
+            (userFollowing, NotPresent)

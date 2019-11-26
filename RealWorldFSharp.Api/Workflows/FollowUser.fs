@@ -1,13 +1,12 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open System
-open RealWorldFSharp.Api.DataAccess
+open RealWorldFSharp.Data
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.QueryModels
-open RealWorldFSharp.Common
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Domain
 
 module FollowUser =
     
@@ -16,42 +15,21 @@ module FollowUser =
                                userManager: UserManager<ApplicationUser>
                            ) =
         member __.Execute(currentUserName, userNameToFollow) =
-            let getUser userName =
-                async {
-                    let! user = userManager.FindByNameAsync(userName) |> Async.AwaitTask
-                    
-                    if isNull user then
-                        return userNotFoundError userName |> expectUsersError
-                    else
-                        return Ok user
-                }
-            let addUserFollowing userFollowing =
-                async {
-                    let! res = (dbContext.UsersFollowing.AddAsync userFollowing).AsTask() |> Async.AwaitTask
-                    let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
-                    return ()
-                }
             asyncResult {
-                let! (identityUserToFollow: ApplicationUser) = getUser userNameToFollow
-                let! (currentIdentityUser: ApplicationUser) = getUser currentUserName
+                let! usernameToFollow = Username.create "username" userNameToFollow |> expectValidationError
+                let currentUsername = Username.create "username" currentUserName |> valueOrException
+
+                let! userInfoOption = DataPipeline.getUserInfo userManager usernameToFollow 
+                let! (userInfoToFollow, _) = noneToUserNotFoundError userInfoOption usernameToFollow.Value |> expectUsersError
                 
-                let query = query {
-                    for f in dbContext.UsersFollowing do
-                    where (f.FollowedId = identityUserToFollow.Id && f.FollowerId = currentIdentityUser.Id)
-                    select f
-                    count
-                }
+                let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
                 
-                if query = 0 then                   
-                    let userFollowing = { FollowerId = currentIdentityUser.Id; FollowedId = identityUserToFollow.Id } 
-                    do! addUserFollowing userFollowing
+                let! userFollowing = DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
                 
-                return {
-                    Profile = {
-                        Username = userNameToFollow
-                        Bio = null
-                        Image = null
-                        Following = Nullable.from true
-                    }
-                }
+                let (userFollowing, result) = addToUserFollowing userInfoToFollow.Id userFollowing
+                if result = Added then
+                    do! DataPipeline.addUserFollowing dbContext (currentUserInfo.Id, userInfoToFollow.Id) |> expectDataRelatedErrorAsync
+                
+                return userInfoToFollow |> toProfileModelEnvelope userFollowing
             }

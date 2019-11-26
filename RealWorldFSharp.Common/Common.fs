@@ -27,3 +27,6 @@ module Nullable =
     
     let from (a:'a) =
         new Nullable<'a>(a)
+        
+    let empty<'a when 'a: struct and 'a: (new: unit-> 'a) and 'a:> System.ValueType> =
+        new Nullable<'a>()

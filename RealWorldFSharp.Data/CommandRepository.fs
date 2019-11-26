@@ -15,6 +15,8 @@ module CommandRepository =
     // TODO: this needs old and new password to work
     type UpdateUserPassword = (ApplicationUser * Password) -> UserIdentityResult<ApplicationUser>
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<ApplicationUser>
+    type AddUserFollowing = UserFollowing -> IoResult<unit>
+    type RemoveUserFollowing = UserFollowing -> IoResult<unit>
     
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (applicationUser, password) ->
@@ -74,4 +76,22 @@ module CommandRepository =
                 else
                     let firstError = res.Errors |> Seq.head
                     return identityError firstError.Code firstError.Description 
+            }
+            
+    let addUserFollowing (dbContext: ApplicationDbContext) : AddUserFollowing =
+        fun userFollowing ->
+            async {
+                let! _ = (dbContext.UsersFollowing.AddAsync userFollowing).AsTask() |> Async.AwaitTask
+                let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
+                return Ok ()
+                // TODO: handle ex?
+            }
+            
+    let removeUserFollowing (dbContext: ApplicationDbContext) : RemoveUserFollowing =
+        fun userFollowing ->
+            async {
+                do (dbContext.UsersFollowing.Remove userFollowing) |> ignore
+                let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
+                return Ok ()
+                // TODO: handle ex?
             }

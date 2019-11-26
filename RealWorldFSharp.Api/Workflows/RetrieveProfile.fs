@@ -3,7 +3,6 @@ namespace RealWorldFSharp.Api.Workflows
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.QueryModels
-open RealWorldFSharp.Api.DataAccess
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities
@@ -15,10 +14,26 @@ module RetrieveProfile =
                                     dbContext: ApplicationDbContext,
                                     userManager: UserManager<ApplicationUser>
                                 ) =
-        member __.Execute(currentUserNameOption, profileUserName) =
+        member __.Execute(currentUsernameOption, profileUserName) =
+            let getUserFollowing username =
+                asyncResult {
+                    let currentUsername = Username.create "username" username |> valueOrException
+                    let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                    let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
+                    return! DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
+                }
+                
             asyncResult {
-                let! username = Username.create "username" profileUserName |> expectValidationError
-                let! userInfoOption = DataPipeline.getUserInfo userManager username 
-                let! (userInfo, _) = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
-                return userInfo |> toProfileModelEnvelope
+                let! profileUsername = Username.create "username" profileUserName |> expectValidationError
+                let! profileUserInfoOption = DataPipeline.getUserInfo userManager profileUsername 
+                let! (profileUserInfo, _) = noneToUserNotFoundError profileUserInfoOption profileUsername.Value |> expectUsersError
+                
+                return!
+                    match currentUsernameOption with
+                    | Some currentUsername ->
+                        asyncResult {
+                            let! userFollowing = getUserFollowing currentUsername
+                            return profileUserInfo |> toProfileModelEnvelope userFollowing
+                        }
+                    | None -> profileUserInfo |> toSimpleProfileModelEnvelope |> AsyncResult.retn
             }

@@ -3,6 +3,7 @@ namespace RealWorldFSharp
 open System
 open System.Collections.Generic
 open RealWorldFSharp.Domain
+open RealWorldFSharp.Common
 
 module QueryModels =
     
@@ -49,12 +50,16 @@ module QueryModels =
             }
         }
         
-    let toProfileModelEnvelope (userInfo: UserInfo) =
+    let toSimpleProfileModelEnvelope (userInfo: UserInfo) =
         {
             Profile = {
                 Username = userInfo.Username.Value
                 Bio = userInfo.Bio |> Option.defaultValue null
                 Image = userInfo.Image |> Option.defaultValue null
-                Following = new Nullable<bool>() 
-            }        
+                Following = Nullable.empty<bool> 
+            }
         }
+        
+    let toProfileModelEnvelope (userFollowing: UserFollowing) (userInfo: UserInfo)  =
+        let envelope = toSimpleProfileModelEnvelope userInfo
+        { envelope with Profile = { envelope.Profile with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }}

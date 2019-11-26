@@ -10,6 +10,7 @@ module Errors =
         | EntityNotFound of entityName: string * id: string
         | EntityIsInUse of entityName: string * id: string
         | UpdateError of entityName:string * id: string * message:string
+        | GenericError of exn
 
     type UsersError =
         | IdentityError of code: string * description: string
@@ -63,6 +64,17 @@ module Errors =
         let error = UserNotFound username
         Result.ofOption error a
 
+    // In here validation error means that invalid data was not provided by user, but instead
+    // it was in our system. So if we have this error we throw exception
+    let private throwOnValidationError entityName (err: ValidationError) =
+        sprintf "Error reading entity [%s]. Field [%s]. Message: %s." entityName err.FieldPath err.Message
+        |> failwith
+
+    let valueOrException (result: Result< 'a, ValidationError>) : 'a =
+        match result with
+        | Ok v -> v
+        | Error e -> throwOnValidationError typeof<'a>.Name e
+    
     (*
     Some type aliases for making code more readable and for preventing
     typo-kind of mistakes: so you don't devlare a validation function with

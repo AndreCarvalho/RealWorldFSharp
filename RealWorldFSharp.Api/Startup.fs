@@ -3,7 +3,7 @@ namespace RealWorldFSharp.Api
 open System
 open System.Text
 open System.Threading.Tasks
-open DataAccess
+open RealWorldFSharp.Data
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Identity
