@@ -105,8 +105,7 @@ module DataPipeline =
         fun article ->
             asyncResult {
                 let entity = article |> DomainToEntityMapping.mapArticleToEntity
-                let tagEntities = article.Tags |> List.map (DomainToEntityMapping.mapTagToEntity (article.Id.ToString()))
-                do! CommandRepository.addArticle dbContext (entity, tagEntities)
+                do! CommandRepository.addArticle dbContext entity
             }
             
     let getArticle (dbContext: ApplicationDbContext) : GetArticle =

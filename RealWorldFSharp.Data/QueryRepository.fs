@@ -1,6 +1,7 @@
 namespace RealWorldFSharp.Data
 
 open Microsoft.AspNetCore.Identity
+open Microsoft.EntityFrameworkCore
 open DataEntities
 open RealWorldFSharp.Common.Errors
 
@@ -11,7 +12,7 @@ module QueryRepository =
     type GetApplicationUserByUsername = UserManager<ApplicationUser> -> Username -> IoQueryResult<ApplicationUser>
     type GetApplicationUserById = UserManager<ApplicationUser> -> UserId -> IoQueryResult<ApplicationUser>
     type GetUserFollowing = ApplicationDbContext -> UserId -> IoResult<UserFollowingEntity>
-    type GetArticle = ApplicationDbContext -> Slug -> IoQueryResult<(ArticleEntity * ArticleTagEntity list)>
+    type GetArticle = ApplicationDbContext -> Slug -> IoQueryResult<ArticleEntity>
 
     let getApplicationUserByUsername : GetApplicationUserByUsername =
         fun userManager username ->
@@ -51,24 +52,11 @@ module QueryRepository =
         fun dbContext slug ->
             async {
                 let articleQuery = query {
-                    for f in dbContext.Articles do
+                    for f in dbContext.Articles.Include("Tags") do
                     where (f.Slug = slug)
                     select f
                     exactlyOneOrDefault
                 }
                 
-                let articleEntityOption = Option.ofObj articleQuery
-                
-                let articleTagsQuery =
-                    match articleEntityOption with
-                    | Some article ->
-                            query {
-                                for t in dbContext.ArticleTags do
-                                where (t.ArticleId = article.Id)
-                                select t
-                            }
-                            |> List.ofSeq
-                    | None -> []
-                    
-                return articleEntityOption |> Option.map (fun a -> (a, articleTagsQuery))
+                return Option.ofObj articleQuery
             }

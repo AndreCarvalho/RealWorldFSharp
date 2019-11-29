@@ -1,5 +1,6 @@
 namespace RealWorldFSharp.Data
 
+open System.Collections.Generic
 open DataEntities
 open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Domain
@@ -33,7 +34,7 @@ module DomainToEntityMapping =
             UserId = article.UserId.Value,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
-            Tags = tags
+            Tags = new List<ArticleTagEntity>(tags)
             )
         
     let mapTagToEntity articleId (tag:Tag): ArticleTagEntity =

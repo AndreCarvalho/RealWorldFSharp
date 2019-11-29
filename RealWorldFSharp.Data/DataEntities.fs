@@ -2,7 +2,7 @@ namespace RealWorldFSharp.Data
 
 open System
 open System.Collections.Generic
-open System.ComponentModel.DataAnnotations.Schema
+open System.ComponentModel.DataAnnotations
 open Microsoft.AspNetCore.Identity
 open Microsoft.AspNetCore.Identity.EntityFrameworkCore
 open Microsoft.EntityFrameworkCore
@@ -23,22 +23,25 @@ module DataEntities =
 
         
     [<AllowNullLiteral>]
-    type ArticleTagEntity() = 
+    type ArticleTagEntity() =
+        [<Key>]
+        member val Id: int = 0 with get, set
         member val ArticleId: string = null with get, set
         member val Tag: string = null with get, set
+        //member val Article: ArticleEntity = null with get, set
 
-    
-    [<AllowNullLiteral>]
-    type ArticleEntity() =
-        member val Id: string = null with get, set
-        member val Title: string = null with get, set
-        member val Slug: string = null with get, set
-        member val Description: string = null with get, set
-        member val Body: string = null with get, set
-        member val UserId: string = null with get, set
-        member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
-        member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
-        [<NotMapped>] member val Tags: ICollection<ArticleTagEntity> = null with get, set
+    and
+        [<AllowNullLiteral>] ArticleEntity() =
+            [<Key>]
+            member val Id: string = null with get, set
+            member val Title: string = null with get, set
+            member val Slug: string = null with get, set
+            member val Description: string = null with get, set
+            member val Body: string = null with get, set
+            member val UserId: string = null with get, set
+            member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+            member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+            member val Tags: List<ArticleTagEntity> = null with get, set
         
     
     type ApplicationDbContext(options:DbContextOptions<ApplicationDbContext>) =
@@ -52,12 +55,11 @@ module DataEntities =
             base.OnModelCreating modelBuilder
             modelBuilder.Entity<UserFollowing>().HasKey("FollowerId", "FollowedId") |> ignore
             
-            modelBuilder.Entity<ArticleEntity>().HasKey("Id") |> ignore
+            modelBuilder.Entity<ArticleTagEntity>().HasOne<ArticleEntity>().WithMany().HasForeignKey("ArticleId") |> ignore
+
             modelBuilder.Entity<ArticleEntity>().HasIndex("Slug").IsUnique() |> ignore
-            //modelBuilder.Entity<ArticleEntity>().HasMany("Tags") |> ignore
+            modelBuilder.Entity<ArticleEntity>().HasMany("Tags").WithOne().HasForeignKey("ArticleId") |> ignore
             
-            modelBuilder.Entity<ArticleTagEntity>().HasKey("ArticleId", "Tag") |> ignore
-//            modelBuilder.Entity<ArticleTagEntity>().HasNoKey() |> ignore
         
         member x.UsersFollowing
             with get() = x.usersFollowing

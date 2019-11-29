@@ -41,17 +41,17 @@ module EntityToDomainMapping =
             Following = following
         }
         
-    let validateArticle (articleEntity:ArticleEntity, articleTags:ArticleTagEntity list) =
+    let validateArticle (articleEntity:ArticleEntity) =
         result {
             let id = Guid.Parse articleEntity.Id
             let! title = Title.create "title" articleEntity.Title
             let slug = Slug.create articleEntity.Slug
             let! description = Description.create "description" articleEntity.Description
             let! body = Body.create "body" articleEntity.Body
-            let! tags = articleTags
-//                       |> Option.ofObj
-//                       |> Option.map List.ofSeq
-//                       |> Option.defaultValue []
+            let! tags = articleEntity.Tags
+                       |> Option.ofObj
+                       |> Option.map List.ofSeq
+                       |> Option.defaultValue []
                        |> List.map (fun y -> Tag.create "tag" y.Tag)
                        |> List.sequenceResultM
             
@@ -72,5 +72,5 @@ module EntityToDomainMapping =
             }
         }
         
-    let mapArticle (article, tags) =
-        validateArticle (article, tags) |> valueOrException        
+    let mapArticle article =
+        validateArticle article |> valueOrException
