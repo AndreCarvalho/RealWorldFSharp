@@ -18,6 +18,7 @@ module CommandRepository =
     type AddUserFollowing = UserFollowing -> IoResult<unit>
     type RemoveUserFollowing = UserFollowing -> IoResult<unit>
     type AddArticle = ArticleEntity -> IoResult<unit>
+    type UpdateArticle = ArticleEntity -> IoResult<unit>
     
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (applicationUser, password) ->
@@ -99,6 +100,15 @@ module CommandRepository =
         fun articleEntity ->
             async {
                 let! _ = (dbContext.Articles.AddAsync articleEntity).AsTask() |> Async.AwaitTask
+                return Ok ()
+                // TODO: handle ex?
+            }
+            
+    let updateArticle (dbContext: ApplicationDbContext) : UpdateArticle =
+        fun articleEntity ->
+            async {
+                articleEntity.Tags <- null // hack to handle duplicate tags on update. it works because we dont update tags...
+                do (dbContext.Articles.Update articleEntity) |> ignore 
                 return Ok ()
                 // TODO: handle ex?
             }

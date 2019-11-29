@@ -14,7 +14,7 @@ module GetArticle =
                                dbContext: ApplicationDbContext,
                                userManager: UserManager<ApplicationUser>
                             ) =
-        member __.Execute(username, articleSlug) =
+        member __.Execute(username, articleSlug) = // TODO: handle login case
             asyncResult {
                 let slug = Slug.create articleSlug
                 let! articleOption = DataPipeline.getArticle dbContext slug

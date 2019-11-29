@@ -20,6 +20,7 @@ module DataPipeline =
     type AddUserFollowing = (UserId * UserId) -> IoResult<unit>
     type RemoveUserFollowing = (UserId * UserId) -> IoResult<unit>
     type AddArticle = Article -> IoResult<unit>
+    type UpdateArticle = Article -> IoResult<unit>
     type GetArticle = Slug -> IoQueryResult<Article>
 
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
@@ -106,6 +107,13 @@ module DataPipeline =
             asyncResult {
                 let entity = article |> DomainToEntityMapping.mapArticleToEntity
                 do! CommandRepository.addArticle dbContext entity
+            }
+            
+    let updateArticle (dbContext: ApplicationDbContext) : UpdateArticle =
+        fun article ->
+            asyncResult {
+                let entity = article |> DomainToEntityMapping.mapArticleToEntity
+                do! CommandRepository.updateArticle dbContext entity
             }
             
     let getArticle (dbContext: ApplicationDbContext) : GetArticle =

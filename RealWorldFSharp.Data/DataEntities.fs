@@ -28,10 +28,9 @@ module DataEntities =
         member val Id: int = 0 with get, set
         member val ArticleId: string = null with get, set
         member val Tag: string = null with get, set
-        //member val Article: ArticleEntity = null with get, set
-
     and
-        [<AllowNullLiteral>] ArticleEntity() =
+        [<AllowNullLiteral>]
+        ArticleEntity() =
             [<Key>]
             member val Id: string = null with get, set
             member val Title: string = null with get, set

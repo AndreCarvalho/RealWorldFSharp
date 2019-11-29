@@ -15,7 +15,8 @@ open RealWorldFSharp.CommandModels
 [<Route("api/articles")>]
 type ArticlesController (
                             createArticleWorkflow:CreateArticleWorkflow,
-                            getArticleWorkflow: GetArticleWorkflow
+                            getArticleWorkflow: GetArticleWorkflow,
+                            updateArticleWorkflow: UpdateArticleWorkflow
                         ) =
     inherit Controller()
     
@@ -29,6 +30,19 @@ type ArticlesController (
                         
         async {
             let! result = createArticleWorkflow.Execute(username, createArticle.Article)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+        
+    [<HttpPut>]
+    [<Route("{articleSlug}")>]
+    member self.UpdateArticle(articleSlug: string, updateArticle: UpdateArticleCommandModelEnvelope) =
+        let username = base.HttpContext.User.Claims
+                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
+                        |> Option.map (fun x -> x.Value)
+                        |> Option.defaultValue "_NOT_A_USER_"
+                        
+        async {
+            let! result = updateArticleWorkflow.Execute(articleSlug, updateArticle.Article)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         

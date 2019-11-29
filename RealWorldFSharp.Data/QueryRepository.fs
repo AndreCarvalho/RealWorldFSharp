@@ -52,7 +52,7 @@ module QueryRepository =
         fun dbContext slug ->
             async {
                 let articleQuery = query {
-                    for f in dbContext.Articles.Include("Tags") do
+                    for f in dbContext.Articles.Include("Tags").AsNoTracking() do
                     where (f.Slug = slug)
                     select f
                     exactlyOneOrDefault

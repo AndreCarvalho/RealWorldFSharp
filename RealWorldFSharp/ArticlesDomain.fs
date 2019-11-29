@@ -73,7 +73,7 @@ module Domain =
         UpdatedAt: DateTimeOffset
     }
             
-    let simpleCreateSlug (title: Title) (dateTime:DateTimeOffset) =
+    let simpleCreateSlug  (dateTime:DateTimeOffset) (title: Title) =
         let title = title.Value
         let words = title.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
         let fstPart = String.Join('-', words)
@@ -85,10 +85,19 @@ module Domain =
             Id = Guid.NewGuid()
             Title = title
             Description = description
-            Slug = simpleCreateSlug title dateTime
+            Slug = simpleCreateSlug dateTime title
             Body = body
             Tags = tags
             CreatedAt = dateTime
             UpdatedAt = dateTime
             UserId = userId
+        }
+        
+    let updateArticle titleOption bodyOption descriptionOption dateTime article =
+        { article with
+            Title = titleOption |> Option.defaultValue article.Title
+            Body = bodyOption |> Option.defaultValue article.Body
+            Description = descriptionOption |> Option.defaultValue article.Description
+            Slug = titleOption |> Option.map (simpleCreateSlug dateTime) |> Option.defaultValue article.Slug
+            UpdatedAt = dateTime
         }

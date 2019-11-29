@@ -57,6 +57,18 @@ module CommandModels =
          Article: CreateArticleCommandModel
     }
     
+    [<CLIMutable>]
+    type UpdateArticleCommandModel = {
+         Title: string
+         Description: string
+         Body: string
+    }
+    
+    [<CLIMutable>]
+    type UpdateArticleCommandModelEnvelope = {
+         Article: UpdateArticleCommandModel
+    }
+    
     type AuthenticateUserCommand = {
         EmailAddress: EmailAddress
         Password: Password
@@ -76,11 +88,21 @@ module CommandModels =
         Tags: Tag list
     }
     
+    type UpdateArticleCommand = {
+        Title: Title option
+        Description: Description option
+        Body: Body option
+    }
+    
     type ValidateRegisterNewUserCommand = RegisterNewUserCommandModel -> ValidationResult<UserInfo * Password>
     type ValidateAuthenticateUserCommand = AuthenticateUserCommandModel -> ValidationResult<AuthenticateUserCommand>
     type ValidateUpdateUserCommand = UpdateUserCommandModel -> ValidationResult<UpdateUserCommand>
     type ValidateCreateArticleCommand = CreateArticleCommandModel -> ValidationResult<CreateArticleCommand>
-    
+    type ValidateUpdateArticleCommand = UpdateArticleCommandModel -> ValidationResult<UpdateArticleCommand>
+
+                
+    let private validateOptional validation value =
+        value |> Option.ofObj |> Option.map validation |> Option.sequenceResult     
 
     let validateRegisterNewUserCommand userId : ValidateRegisterNewUserCommand =
         fun command ->
@@ -114,15 +136,8 @@ module CommandModels =
     let validateUpdateUserCommand: ValidateUpdateUserCommand =
         fun command ->
             result {
-                let! emailAddress = command.Email
-                                    |> Option.ofObj 
-                                    |> Option.map (EmailAddress.create "email")
-                                    |> Option.sequenceResult
-                let! username = command.Username
-                                    |> Option.ofObj 
-                                    |> Option.map (Username.create "username")
-                                    |> Option.sequenceResult
-                                    
+                let! emailAddress = command.Email |> validateOptional (EmailAddress.create "email")
+                let! username = command.Username |> validateOptional (Username.create "username")
                 let bio = command.Bio |> Option.ofObj
                 let image = command.Image |> Option.ofObj
                 
@@ -149,5 +164,19 @@ module CommandModels =
                     Description = description
                     Body = body
                     Tags = validatedTags
+                }
+            }
+            
+    let validateUpdateArticleCommand : ValidateUpdateArticleCommand =
+        fun command ->
+            result {
+                let! title = command.Title |> validateOptional (Title.create "title")
+                let! description = command.Description |> validateOptional (Description.create "description") 
+                let! body = command.Body |> validateOptional (Body.create "body")
+
+                return {
+                    Title = title
+                    Description = description
+                    Body = body
                 }
             }
