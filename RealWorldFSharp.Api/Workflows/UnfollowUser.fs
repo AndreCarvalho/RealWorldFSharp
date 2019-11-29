@@ -19,10 +19,10 @@ module UnfollowUser =
                 let! usernameToUnfollow = Username.create "username" userNameToUnfollow |> expectValidationError
                 let currentUsername = Username.create "username" currentUserName |> valueOrException
 
-                let! userInfoOption = DataPipeline.getUserInfo userManager usernameToUnfollow 
+                let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToUnfollow 
                 let! (userInfoToUnfollow, _) = noneToUserNotFoundError userInfoOption usernameToUnfollow.Value |> expectUsersError
                 
-                let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                let! currentUserInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername
                 let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
                 
                 dbContext.ChangeTracker.QueryTrackingBehavior <- QueryTrackingBehavior.NoTracking
@@ -31,7 +31,8 @@ module UnfollowUser =
                 let (userFollowing, result) = removeFromUserFollowing userInfoToUnfollow.Id userFollowing
                 if result = Removed then
                     do! DataPipeline.removeUserFollowing dbContext (currentUserInfo.Id, userInfoToUnfollow.Id) |> expectDataRelatedErrorAsync
-                
+                    do! dbContext.SaveChangesAsync()
+                    
                 return userInfoToUnfollow |> toProfileModelEnvelope userFollowing
             }
 

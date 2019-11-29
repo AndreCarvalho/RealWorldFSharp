@@ -18,14 +18,14 @@ module RetrieveProfile =
             let getUserFollowing username =
                 asyncResult {
                     let currentUsername = Username.create "username" username |> valueOrException
-                    let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                    let! currentUserInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername
                     let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
                     return! DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
                 }
                 
             asyncResult {
                 let! profileUsername = Username.create "username" profileUserName |> expectValidationError
-                let! profileUserInfoOption = DataPipeline.getUserInfo userManager profileUsername 
+                let! profileUserInfoOption = DataPipeline.getUserInfoByUsername userManager profileUsername 
                 let! (profileUserInfo, _) = noneToUserNotFoundError profileUserInfoOption profileUsername.Value |> expectUsersError
                 
                 return!

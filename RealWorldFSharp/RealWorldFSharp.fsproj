@@ -5,7 +5,8 @@
     </PropertyGroup>
     
     <ItemGroup>
-        <Compile Include="Domain.fs" />
+        <Compile Include="UsersDomain.fs" />
+        <Compile Include="ArticlesDomain.fs" />
         <Compile Include="CommandModels.fs" />
         <Compile Include="QueryModels.fs" />
     </ItemGroup>

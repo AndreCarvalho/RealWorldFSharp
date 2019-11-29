@@ -1,7 +1,9 @@
 namespace RealWorldFSharp
 
+open Articles.Domain
 open FsToolkit.ErrorHandling
-open Domain
+open RealWorldFSharp.Domain
+open RealWorldFSharp.Common
 open RealWorldFSharp.Common.Errors
 
 module CommandModels =
@@ -42,7 +44,20 @@ module CommandModels =
         User: UpdateUserCommandModel
     }
     
-     type AuthenticateUserCommand = {
+    [<CLIMutable>]
+    type CreateArticleCommandModel = {
+         Title: string
+         Description: string
+         Body: string
+         TagList: string array
+    }
+    
+    [<CLIMutable>]
+    type CreateArticleCommandModelEnvelope = {
+         Article: CreateArticleCommandModel
+    }
+    
+    type AuthenticateUserCommand = {
         EmailAddress: EmailAddress
         Password: Password
     }
@@ -53,11 +68,19 @@ module CommandModels =
         EmailAddress: EmailAddress option
         Username: Username option
     }
-
+    
+    type CreateArticleCommand = {
+        Title: Title
+        Description: Description
+        Body: Body
+        Tags: Tag list
+    }
     
     type ValidateRegisterNewUserCommand = RegisterNewUserCommandModel -> ValidationResult<UserInfo * Password>
     type ValidateAuthenticateUserCommand = AuthenticateUserCommandModel -> ValidationResult<AuthenticateUserCommand>
     type ValidateUpdateUserCommand = UpdateUserCommandModel -> ValidationResult<UpdateUserCommand>
+    type ValidateCreateArticleCommand = CreateArticleCommandModel -> ValidationResult<CreateArticleCommand>
+    
 
     let validateRegisterNewUserCommand userId : ValidateRegisterNewUserCommand =
         fun command ->
@@ -86,7 +109,7 @@ module CommandModels =
                     EmailAddress = emailAddress
                     Password = password
                 }
-            }
+            }            
             
     let validateUpdateUserCommand: ValidateUpdateUserCommand =
         fun command ->
@@ -109,4 +132,22 @@ module CommandModels =
                     EmailAddress = emailAddress
                     Username = username
                 } 
+            }
+            
+    let validateCreateArticleCommand : ValidateCreateArticleCommand =
+        fun command ->
+            result {
+                let! title = Title.create "title" command.Title 
+                let! description = Description.create "description" command.Description 
+                let! body = Body.create "body" command.Body
+                
+                let tags = if (isNull command.TagList) then [||] else command.TagList
+                let! validatedTags = tags |> Array.map (Tag.create "tag") |> List.ofArray |> Result.combine
+                
+                return {
+                    Title = title
+                    Description = description
+                    Body = body
+                    Tags = validatedTags
+                }
             }

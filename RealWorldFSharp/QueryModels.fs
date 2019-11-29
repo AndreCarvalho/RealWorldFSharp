@@ -1,5 +1,11 @@
 namespace RealWorldFSharp
 
+open Articles.Domain
+open System
+open System
+open System
+open System
+open System
 open System
 open System.Collections.Generic
 open RealWorldFSharp.Domain
@@ -26,7 +32,7 @@ module QueryModels =
         User: UserModel
     }
     
-    [<CLIMutableAttribute>]
+    [<CLIMutable>]
     type ProfileModel = {
         Username: string
         Bio: string
@@ -38,7 +44,25 @@ module QueryModels =
     type ProfileModelEnvelope = {
         Profile: ProfileModel
     }
-
+    
+    [<CLIMutable>]
+    type ArticleModel = {
+        Slug: string
+        Title: string
+        Description: string
+        Body: string
+        TagList: string array
+        CreatedAt: DateTimeOffset
+        UpdatedAt: DateTimeOffset
+        Favorited: bool
+        FavoritesCount: int
+        Author : ProfileModel
+    }
+    
+    [<CLIMutable>]
+    type ArticleModelEnvelope = {
+        Article: ArticleModel
+    }
     let toUserModelEnvelope token (userInfo: UserInfo) =
         {
             User = {
@@ -50,16 +74,37 @@ module QueryModels =
             }
         }
         
+    let toSimpleProfileModel (userInfo: UserInfo) = 
+        {
+            Username = userInfo.Username.Value
+            Bio = userInfo.Bio |> Option.defaultValue null
+            Image = userInfo.Image |> Option.defaultValue null
+            Following = Nullable.empty<bool> 
+        }
+        
     let toSimpleProfileModelEnvelope (userInfo: UserInfo) =
         {
-            Profile = {
-                Username = userInfo.Username.Value
-                Bio = userInfo.Bio |> Option.defaultValue null
-                Image = userInfo.Image |> Option.defaultValue null
-                Following = Nullable.empty<bool> 
-            }
+            Profile = toSimpleProfileModel userInfo
         }
         
     let toProfileModelEnvelope (userFollowing: UserFollowing) (userInfo: UserInfo)  =
         let envelope = toSimpleProfileModelEnvelope userInfo
         { envelope with Profile = { envelope.Profile with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }}
+
+    let toArticleModel (userInfo: UserInfo) (article: Article) =
+        {
+            Slug = article.Slug.Value
+            Title = article.Title.Value
+            Description = article.Description.Value
+            Body = article.Body.Value
+            TagList = article.Tags |> Array.ofList |> Array.map (fun x -> x.Value)
+            CreatedAt = article.CreatedAt
+            UpdatedAt = article.UpdatedAt
+            Favorited = false //TODO
+            FavoritesCount = 0 //TODO
+            Author = toSimpleProfileModel userInfo
+        }
+    let toSingleArticleEnvelope userInfo article =
+        {
+            Article = toArticleModel userInfo article
+        }

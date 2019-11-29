@@ -19,10 +19,10 @@ module FollowUser =
                 let! usernameToFollow = Username.create "username" userNameToFollow |> expectValidationError
                 let currentUsername = Username.create "username" currentUserName |> valueOrException
 
-                let! userInfoOption = DataPipeline.getUserInfo userManager usernameToFollow 
+                let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToFollow 
                 let! (userInfoToFollow, _) = noneToUserNotFoundError userInfoOption usernameToFollow.Value |> expectUsersError
                 
-                let! currentUserInfoOption = DataPipeline.getUserInfo userManager currentUsername
+                let! currentUserInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername
                 let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
                 
                 let! userFollowing = DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
@@ -30,6 +30,7 @@ module FollowUser =
                 let (userFollowing, result) = addToUserFollowing userInfoToFollow.Id userFollowing
                 if result = Added then
                     do! DataPipeline.addUserFollowing dbContext (currentUserInfo.Id, userInfoToFollow.Id) |> expectDataRelatedErrorAsync
+                    do! dbContext.SaveChangesAsync()
                 
                 return userInfoToFollow |> toProfileModelEnvelope userFollowing
             }

@@ -61,7 +61,7 @@ module UpdateUser =
                 let! command = CommandModels.validateUpdateUserCommand commandModel |> expectValidationError
                 let! username = Username.create "username" username |> expectValidationError
 
-                let! userInfoOption = DataPipeline.getUserInfo userManager username
+                let! userInfoOption = DataPipeline.getUserInfoByUsername userManager username
                 let! (userInfo, applicationUser) = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
                 
                 let! userInfo = tryUpdateUsername command userInfo applicationUser |> expectUsersErrorAsync

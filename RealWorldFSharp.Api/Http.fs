@@ -22,7 +22,10 @@ module Http =
             | UserNotFound _ -> controller.NotFound() :> IActionResult
             | WrongPassword username -> controller.BadRequest(singletonError "authentication" (sprintf "Incorrect password for user '%s'" username)) :> IActionResult
         | ValidationError er -> controller.BadRequest(mapValidationError er) :> IActionResult
-        | DataError _ -> failwith "Unexpected data error"
+        | DataError derr ->
+            match derr with
+            | EntityNotFound _ -> controller.NotFound() :> IActionResult
+            | _ -> failwith "Unexpected data error"
         | Bug ex -> failwith (ex.ToString())
     
     let resultToActionResult (controller: ControllerBase) result =

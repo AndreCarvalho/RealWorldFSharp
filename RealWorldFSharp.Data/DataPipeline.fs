@@ -3,6 +3,7 @@
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open DataEntities
+open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Domain
 open RealWorldFSharp.Common.Errors
 
@@ -10,14 +11,17 @@ module DataPipeline =
     
     type RegisterNewUser = UserInfo * Password -> UserIdentityResult<unit>
     type AuthenticateUser = EmailAddress * Password -> UserIdentityResult<UserInfo>
-    type GetUserInfo = Username -> IoQueryResult<(UserInfo * ApplicationUser)>
+    type GetUserInfoByUsername = Username -> IoQueryResult<(UserInfo * ApplicationUser)>
+    type GetUserInfoById = UserId -> IoQueryResult<(UserInfo * ApplicationUser)>
     type UpdateUserEmailAddress = (ApplicationUser * EmailAddress) -> UserIdentityResult<UserInfo>
     type UpdateUserUsername = (ApplicationUser * Username) -> UserIdentityResult<UserInfo>
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<unit>
     type GetUserFollowing = UserId -> IoResult<UserFollowing>
     type AddUserFollowing = (UserId * UserId) -> IoResult<unit>
     type RemoveUserFollowing = (UserId * UserId) -> IoResult<unit>
-        
+    type AddArticle = Article -> IoResult<unit>
+    type GetArticle = Slug -> IoQueryResult<Article>
+
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
             let applicationUser = userInfo |> DomainToEntityMapping.mapUserInfoToApplicationUser
@@ -33,10 +37,21 @@ module DataPipeline =
                 return applicationUser |> Result.map EntityToDomainMapping.mapApplicationUserToUserInfo
             }
             
-    let getUserInfo (userManager: UserManager<ApplicationUser>) : GetUserInfo =
+    let getUserInfoByUsername (userManager: UserManager<ApplicationUser>) : GetUserInfoByUsername =
         fun (username) ->
             async {
-                let! applicationUser = QueryRepository.getApplicationUser userManager username.Value
+                let! applicationUser = QueryRepository.getApplicationUserByUsername userManager username.Value
+                
+                return
+                    match applicationUser with
+                    | Some user -> Some (EntityToDomainMapping.mapApplicationUserToUserInfo user, user)
+                    | None -> None
+            }
+                
+    let getUserInfoById (userManager: UserManager<ApplicationUser>) : GetUserInfoById =
+        fun userId ->
+            async {
+                let! applicationUser = QueryRepository.getApplicationUserById userManager userId.Value
                 
                 return
                     match applicationUser with
@@ -77,10 +92,26 @@ module DataPipeline =
             asyncResult {
                 let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
                 do! CommandRepository.addUserFollowing dbContext userFollowing
-            }            
+            }
+            
     let removeUserFollowing (dbContext: ApplicationDbContext) : RemoveUserFollowing =
         fun (followerId, followedId) ->
             asyncResult {
                 let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
                 do! CommandRepository.removeUserFollowing dbContext userFollowing
+            }
+            
+    let addArticle (dbContext: ApplicationDbContext) : AddArticle =
+        fun article ->
+            asyncResult {
+                let entity = article |> DomainToEntityMapping.mapArticleToEntity
+                let tagEntities = article.Tags |> List.map (DomainToEntityMapping.mapTagToEntity (article.Id.ToString()))
+                do! CommandRepository.addArticle dbContext (entity, tagEntities)
+            }
+            
+    let getArticle (dbContext: ApplicationDbContext) : GetArticle =
+        fun slug ->
+            async {
+                let! result = QueryRepository.getArticle dbContext slug.Value
+                return result |> Option.map (EntityToDomainMapping.mapArticle) 
             }

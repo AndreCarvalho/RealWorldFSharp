@@ -15,10 +15,13 @@
         <Compile Include="Workflows\RetrieveProfile.fs" />
         <Compile Include="Workflows\FollowUser.fs" />
         <Compile Include="Workflows\UnfollowUser.fs" />
+        <Compile Include="Workflows\CreateArticle.fs" />
+        <Compile Include="Workflows\GetArticle.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />
         <Compile Include="Controllers\ProfilesController.fs" />
+        <Compile Include="Controllers\ArticlesController.fs" />
         <Folder Include="Middleware" />
         <Compile Include="Startup.fs" />
         <Compile Include="Program.fs" />

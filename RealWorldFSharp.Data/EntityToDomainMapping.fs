@@ -1,7 +1,9 @@
 namespace RealWorldFSharp.Data
 
+open System
 open FsToolkit.ErrorHandling
 open DataEntities
+open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Domain
 open RealWorldFSharp.Common.Errors
 
@@ -23,7 +25,7 @@ module EntityToDomainMapping =
                 }
             }
     
-    let mapApplicationUserToUserInfo (applicationUser: ApplicationUser) : UserInfo =
+    let mapApplicationUserToUserInfo applicationUser =
         validateApplicationUser applicationUser |> valueOrException
         
     let mapUserFollowing (userFollowing:UserFollowingEntity) : UserFollowing =
@@ -38,3 +40,37 @@ module EntityToDomainMapping =
             Id = userId
             Following = following
         }
+        
+    let validateArticle (articleEntity:ArticleEntity, articleTags:ArticleTagEntity list) =
+        result {
+            let id = Guid.Parse articleEntity.Id
+            let! title = Title.create "title" articleEntity.Title
+            let slug = Slug.create articleEntity.Slug
+            let! description = Description.create "description" articleEntity.Description
+            let! body = Body.create "body" articleEntity.Body
+            let! tags = articleTags
+//                       |> Option.ofObj
+//                       |> Option.map List.ofSeq
+//                       |> Option.defaultValue []
+                       |> List.map (fun y -> Tag.create "tag" y.Tag)
+                       |> List.sequenceResultM
+            
+            let! userId = UserId.create "userid" articleEntity.UserId
+            let createdAt = articleEntity.CreatedAt
+            let updatedAt = articleEntity.UpdatedAt
+            
+            return {
+                Id = id
+                Title = title
+                Slug = slug
+                Description = description
+                Body = body
+                Tags = tags
+                UserId = userId
+                CreatedAt = createdAt
+                UpdatedAt = updatedAt
+            }
+        }
+        
+    let mapArticle (article, tags) =
+        validateArticle (article, tags) |> valueOrException        

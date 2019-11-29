@@ -17,6 +17,7 @@ module CommandRepository =
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<ApplicationUser>
     type AddUserFollowing = UserFollowing -> IoResult<unit>
     type RemoveUserFollowing = UserFollowing -> IoResult<unit>
+    type AddArticle = (ArticleEntity * ArticleTagEntity list) -> IoResult<unit>
     
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (applicationUser, password) ->
@@ -82,7 +83,6 @@ module CommandRepository =
         fun userFollowing ->
             async {
                 let! _ = (dbContext.UsersFollowing.AddAsync userFollowing).AsTask() |> Async.AwaitTask
-                let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
                 return Ok ()
                 // TODO: handle ex?
             }
@@ -91,7 +91,16 @@ module CommandRepository =
         fun userFollowing ->
             async {
                 do (dbContext.UsersFollowing.Remove userFollowing) |> ignore
-                let! _ = dbContext.SaveChangesAsync() |> Async.AwaitTask
+                return Ok ()
+                // TODO: handle ex?
+            }
+            
+    let addArticle (dbContext: ApplicationDbContext) : AddArticle =
+        fun (articleEntity, tagEntities) ->
+            async {
+                let! _ = (dbContext.Articles.AddAsync articleEntity).AsTask() |> Async.AwaitTask
+                let! _ = tagEntities |> List.map (fun x -> (dbContext.ArticleTags.AddAsync x).AsTask() |> Async.AwaitTask) |> Async.Sequential
+                
                 return Ok ()
                 // TODO: handle ex?
             }

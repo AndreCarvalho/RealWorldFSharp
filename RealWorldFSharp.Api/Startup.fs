@@ -3,7 +3,6 @@ namespace RealWorldFSharp.Api
 open System
 open System.Text
 open System.Threading.Tasks
-open RealWorldFSharp.Data
 open Microsoft.AspNetCore.Builder
 open Microsoft.AspNetCore.Hosting
 open Microsoft.AspNetCore.Identity
@@ -17,7 +16,9 @@ open RealWorldFSharp.Api.Workflows.AuthenticateUser
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open RealWorldFSharp.Data.DataEntities
+open Workflows.CreateArticle
 open Workflows.FollowUser
+open Workflows.GetArticle
 open Workflows.RetrieveProfile
 open Workflows.RetrieveUser
 open Workflows.UnfollowUser
@@ -50,6 +51,8 @@ type Startup private () =
         services.AddTransient<RetrieveProfileWorkflow>() |> ignore
         services.AddTransient<FollowUserWorkflow>() |> ignore
         services.AddTransient<UnfollowUserWorkflow>() |> ignore
+        services.AddTransient<CreateArticleWorkflow>() |> ignore
+        services.AddTransient<GetArticleWorkflow>() |> ignore
         
         let appSettingsSection = this.Configuration.GetSection "JwtConfiguration"
         services.Configure<JwtConfiguration> appSettingsSection |> ignore
