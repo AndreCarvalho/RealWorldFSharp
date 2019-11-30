@@ -1,33 +1,29 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open System
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open RealWorldFSharp
-open RealWorldFSharp.Articles
+open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain
 open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.CommandModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
-open RealWorldFSharp.Domain
 
-type CreateArticleWorkflow (
+type DeleteArticleWorkflow (
                                dbContext: ApplicationDbContext,
                                userManager: UserManager<ApplicationUser>
                            ) =
-    member __.Execute(username, command: CreateArticleCommandModel) =
+    member __.Execute(username, articleSlug) =
         asyncResult {
             let currentUsername = Username.create "username" username |> valueOrException
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername 
             let! (userInfo, _) = noneToUserNotFoundError userInfoOption currentUsername.Value |> expectUsersError
-            
-            let! cmd = validateCreateArticleCommand command |> expectValidationError
-            
-            let now = DateTimeOffset.UtcNow
-            let article = Domain.createArticle userInfo.Id cmd.Title cmd.Description cmd.Body cmd.Tags now
 
-            do! DataPipeline.addArticle dbContext article |> expectDataRelatedErrorAsync
-            do! dbContext.SaveChangesAsync()
+            let slug = Slug.create articleSlug
+            let! articleOption = DataPipeline.getArticle dbContext slug
+            let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            return article |> QueryModels.toSingleArticleEnvelope userInfo
+            let! article = validateDeleteArticle article userInfo |> expectOperationNotAllowedError
+            
+            do! DataPipeline.deleteArticle dbContext article |> expectDataRelatedErrorAsync
+            do! dbContext.SaveChangesAsync()
         }

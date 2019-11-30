@@ -15,7 +15,8 @@ open RealWorldFSharp.CommandModels
 type ArticlesController (
                             createArticleWorkflow:CreateArticleWorkflow,
                             getArticleWorkflow: GetArticleWorkflow,
-                            updateArticleWorkflow: UpdateArticleWorkflow
+                            updateArticleWorkflow: UpdateArticleWorkflow,
+                            deleteArticleWorkflow: DeleteArticleWorkflow
                         ) =
     inherit Controller()
     
@@ -36,6 +37,16 @@ type ArticlesController (
                         
         async {
             let! result = updateArticleWorkflow.Execute(articleSlug, updateArticle.Article)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+        
+    [<HttpDelete>]
+    [<Route("{articleSlug}")>]
+    member self.DeleteArticle(articleSlug: string) =
+        let username = base.HttpContext |> Http.getUserName
+                        
+        async {
+            let! result = deleteArticleWorkflow.Execute(username, articleSlug)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         

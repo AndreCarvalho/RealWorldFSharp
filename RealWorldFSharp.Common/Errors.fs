@@ -5,6 +5,10 @@ module Errors =
         { FieldPath: string
           Message: string }
 
+    type OperationNotAllowedError =
+        { Operation: string
+          Reason: string }
+    
     type DataRelatedError =
         | EntityAlreadyExists of entityName: string * id: string
         | EntityNotFound of entityName: string * id: string
@@ -19,6 +23,7 @@ module Errors =
        
     type Error =
         | ValidationError of ValidationError
+        | OperationNotAllowed of OperationNotAllowedError
         | UsersError of UsersError
         | DataError of DataRelatedError
         | Bug of exn
@@ -34,12 +39,14 @@ module Errors =
     let notFound name id = EntityNotFound (name, id) |> Error
 
     let entityInUse name = EntityIsInUse name |> Error
+    
+    let operationNotAllowed operation reason = { Operation = operation; Reason = reason } |> Error
 
     let expectValidationError result = Result.mapError ValidationError result
     
     let expectUsersError result = Result.mapError UsersError result
 
-//    let expectOperationNotAllowedError result = Result.mapError OperationNotAllowed result
+    let expectOperationNotAllowedError result = Result.mapError OperationNotAllowed result
 
     let expectDataRelatedError result =
         Result.mapError DataError result

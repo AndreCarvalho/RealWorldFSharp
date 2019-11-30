@@ -101,3 +101,10 @@ module Domain =
             Slug = titleOption |> Option.map (simpleCreateSlug dateTime) |> Option.defaultValue article.Slug
             UpdatedAt = dateTime
         }
+        
+        
+    let validateDeleteArticle article (user:UserInfo) =
+        if article.UserId = user.Id then
+            Ok article
+        else
+            operationNotAllowed "Delete article" "Not article creator"

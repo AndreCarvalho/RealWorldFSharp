@@ -22,6 +22,7 @@ module DataPipeline =
     type AddArticle = Article -> IoResult<unit>
     type UpdateArticle = Article -> IoResult<unit>
     type GetArticle = Slug -> IoQueryResult<Article>
+    type DeleteArticle = Article -> IoResult<unit>
 
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
@@ -44,9 +45,8 @@ module DataPipeline =
                 let! applicationUser = QueryRepository.getApplicationUserByUsername userManager username.Value
                 
                 return
-                    match applicationUser with
-                    | Some user -> Some (EntityToDomainMapping.mapApplicationUserToUserInfo user, user)
-                    | None -> None
+                    applicationUser
+                    |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user, user))
             }
                 
     let getUserInfoById (userManager: UserManager<ApplicationUser>) : GetUserInfoById =
@@ -55,9 +55,8 @@ module DataPipeline =
                 let! applicationUser = QueryRepository.getApplicationUserById userManager userId.Value
                 
                 return
-                    match applicationUser with
-                    | Some user -> Some (EntityToDomainMapping.mapApplicationUserToUserInfo user, user)
-                    | None -> None
+                    applicationUser
+                    |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user, user))
             }
     
     let updateUserEmailAddress (userManager: UserManager<ApplicationUser>) : UpdateUserEmailAddress =
@@ -121,4 +120,11 @@ module DataPipeline =
             async {
                 let! result = QueryRepository.getArticle dbContext slug.Value
                 return result |> Option.map (EntityToDomainMapping.mapArticle) 
+            }
+            
+    let deleteArticle (dbContext: ApplicationDbContext) : DeleteArticle =
+        fun article ->
+            asyncResult {
+                let entity = article |> DomainToEntityMapping.mapArticleToEntity
+                do! CommandRepository.deleteArticle dbContext entity
             }

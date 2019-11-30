@@ -25,6 +25,7 @@ module Http =
             | UserNotFound _ -> controller.NotFound() :> IActionResult
             | WrongPassword username -> controller.BadRequest(singletonError "authentication" (sprintf "Incorrect password for user '%s'" username)) :> IActionResult
         | ValidationError er -> controller.BadRequest(mapValidationError er) :> IActionResult
+        | OperationNotAllowed ona -> controller.Unauthorized(singletonError ona.Operation ona.Reason) :> IActionResult
         | DataError derr ->
             match derr with
             | EntityNotFound _ -> controller.NotFound() :> IActionResult
