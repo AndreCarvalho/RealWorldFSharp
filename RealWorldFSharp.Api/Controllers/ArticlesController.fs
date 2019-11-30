@@ -1,12 +1,11 @@
 namespace RealWorldFSharp.Api.Controllers
 
-open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
+open RealWorldFSharp.Api
 open RealWorldFSharp.Api.Http
-open RealWorldFSharp.Api.Workflows.CreateArticle
-open RealWorldFSharp.Api.Workflows.GetArticle
+open RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.CommandModels
 
 
@@ -23,10 +22,7 @@ type ArticlesController (
     [<HttpPost>]
     [<Route("")>]
     member self.CreateArticle(createArticle: CreateArticleCommandModelEnvelope) =
-        let username = base.HttpContext.User.Claims
-                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                        |> Option.map (fun x -> x.Value)
-                        |> Option.defaultValue "_NOT_A_USER_"
+        let username = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = createArticleWorkflow.Execute(username, createArticle.Article)
@@ -36,10 +32,7 @@ type ArticlesController (
     [<HttpPut>]
     [<Route("{articleSlug}")>]
     member self.UpdateArticle(articleSlug: string, updateArticle: UpdateArticleCommandModelEnvelope) =
-        let username = base.HttpContext.User.Claims
-                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                        |> Option.map (fun x -> x.Value)
-                        |> Option.defaultValue "_NOT_A_USER_"
+        let username = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = updateArticleWorkflow.Execute(articleSlug, updateArticle.Article)
@@ -50,10 +43,7 @@ type ArticlesController (
     [<AllowAnonymous>]
     [<Route("{articleSlug}")>]
     member self.GetArticle(articleSlug: string) =
-        let username = base.HttpContext.User.Claims
-                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                        |> Option.map (fun x -> x.Value)
-                        |> Option.defaultValue "_NOT_A_USER_"
+        let username = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = getArticleWorkflow.Execute(username, articleSlug)

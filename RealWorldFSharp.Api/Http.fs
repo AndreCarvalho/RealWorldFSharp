@@ -1,8 +1,11 @@
 namespace RealWorldFSharp.Api
 
+open Microsoft.AspNetCore.Http
 open System.Collections.Generic
+open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
 open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Common
 open RealWorldFSharp.QueryModels
 
 module Http =
@@ -32,3 +35,13 @@ module Http =
         match result with
         | Ok x -> controller.Ok(x) :> IActionResult
         | Error err -> errorToActionResult controller err
+        
+    let getUserNameOption (httpContext: HttpContext) =
+        httpContext.User.Claims
+        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
+        |> Option.map (fun x -> x.Value)
+        
+    let getUserName (httpContext: HttpContext) =
+        httpContext
+        |> getUserNameOption
+        |> Option.valueOrException "could not find username in Claims"

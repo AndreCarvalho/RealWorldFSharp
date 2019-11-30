@@ -30,3 +30,10 @@ module Nullable =
         
     let empty<'a when 'a: struct and 'a: (new: unit-> 'a) and 'a:> System.ValueType> =
         new Nullable<'a>()
+
+[<RequireQualifiedAccess>]
+module Option =
+    let valueOrException msg (option: Option<'a>): 'a =
+        match option with
+        | Some v -> v
+        | None -> failwith msg

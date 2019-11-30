@@ -11,18 +11,10 @@ open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Hosting
 open Microsoft.EntityFrameworkCore
 open Settings
-open RealWorldFSharp.Api.Workflows.RegisterNewUser
-open RealWorldFSharp.Api.Workflows.AuthenticateUser
+open RealWorldFSharp.Api.Workflows
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open RealWorldFSharp.Data.DataEntities
-open Workflows.CreateArticle
-open Workflows.FollowUser
-open Workflows.GetArticle
-open Workflows.RetrieveProfile
-open Workflows.RetrieveUser
-open Workflows.UnfollowUser
-open Workflows.UpdateUser
 
 type Startup private () =
     new (configuration: IConfiguration) as this =

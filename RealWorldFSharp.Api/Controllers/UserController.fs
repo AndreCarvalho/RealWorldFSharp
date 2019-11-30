@@ -1,12 +1,11 @@
 namespace RealWorldFSharp.Api.Controllers
 
-open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
+open RealWorldFSharp.Api
 open RealWorldFSharp.Api.Http
-open RealWorldFSharp.Api.Workflows.RetrieveUser
-open RealWorldFSharp.Api.Workflows.UpdateUser
+open RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.CommandModels
 
 [<Authorize>]
@@ -21,10 +20,7 @@ type UserController(
     [<HttpGet>]
     [<Route("")>]
     member self.Get() =
-        let userName = base.HttpContext.User.Claims
-                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                        |> Option.map (fun x -> x.Value)
-                        |> Option.defaultValue "_NOT_A_USER_"
+        let userName = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = retrieveUserWorkflow.Execute userName
@@ -35,10 +31,7 @@ type UserController(
     [<HttpPut>]
     [<Route("")>]
     member self.Put(updateUser: UpdateUserCommandModelEnvelope) =
-        let userName = base.HttpContext.User.Claims
-                        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                        |> Option.map (fun x -> x.Value)
-                        |> Option.defaultValue "_NOT_A_USER_"
+        let userName = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = updateUserWorkflow.Execute(userName, updateUser.User)

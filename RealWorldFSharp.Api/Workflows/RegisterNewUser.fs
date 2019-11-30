@@ -13,17 +13,15 @@ open RealWorldFSharp.Data
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
 
-module RegisterNewUser =
-    
-    type RegisterNewUserWorkflow(
-                                    userManager: UserManager<ApplicationUser>,
-                                    jwtOption: IOptions<JwtConfiguration>
-                                ) =
-        member __.Execute(command: RegisterNewUserCommandModel) =
-            asyncResult {
-                let userId = Guid.NewGuid().ToString()              
-                let! (user, password) = validateRegisterNewUserCommand userId command |> expectValidationError
-                do! DataPipeline.registerNewUser userManager (user, password) |> expectUsersErrorAsync
-                let token = user |> Authentication.createToken jwtOption.Value
-                return user |> toUserModelEnvelope token
-            }
+type RegisterNewUserWorkflow(
+                                userManager: UserManager<ApplicationUser>,
+                                jwtOption: IOptions<JwtConfiguration>
+                            ) =
+    member __.Execute(command: RegisterNewUserCommandModel) =
+        asyncResult {
+            let userId = Guid.NewGuid().ToString()              
+            let! (user, password) = validateRegisterNewUserCommand userId command |> expectValidationError
+            do! DataPipeline.registerNewUser userManager (user, password) |> expectUsersErrorAsync
+            let token = user |> Authentication.createToken jwtOption.Value
+            return user |> toUserModelEnvelope token
+        }

@@ -1,13 +1,11 @@
 namespace RealWorldFSharp.Api.Controllers
 
-open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Authorization
+open RealWorldFSharp.Api
 open RealWorldFSharp.Api.Http
-open RealWorldFSharp.Api.Workflows.FollowUser
-open RealWorldFSharp.Api.Workflows.RetrieveProfile
-open RealWorldFSharp.Api.Workflows.UnfollowUser
+open RealWorldFSharp.Api.Workflows
 
 [<Authorize>]
 [<ApiController>]
@@ -23,9 +21,7 @@ type ProfilesController(
     [<AllowAnonymous>]
     [<Route("{userName}")>]
     member x.Get(userName: string) =
-        let currentUserName = base.HttpContext.User.Claims
-                                |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                                |> Option.map (fun x -> x.Value)
+        let currentUserName = base.HttpContext |> Http.getUserNameOption
                                 
         async {
             let! result = retrieveProfileWorkflow.Execute(currentUserName, userName)
@@ -35,10 +31,7 @@ type ProfilesController(
     [<HttpPost>]
     [<Route("{userNameToFollow}/follow")>]
     member x.Follow(userNameToFollow: string) =
-        let currentUserName = base.HttpContext.User.Claims
-                                |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                                |> Option.map (fun x -> x.Value)
-                                |> Option.defaultValue "_NOT_A_USER_"
+        let currentUserName = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = followUserWorkflow.Execute(currentUserName, userNameToFollow)
@@ -48,10 +41,7 @@ type ProfilesController(
     [<HttpDelete>]
     [<Route("{userNameToUnfollow}/follow")>]
     member x.Unfollow(userNameToUnfollow: string) =
-        let currentUserName = base.HttpContext.User.Claims
-                                |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
-                                |> Option.map (fun x -> x.Value)
-                                |> Option.defaultValue "_NOT_A_USER_"
+        let currentUserName = base.HttpContext |> Http.getUserName
                         
         async {
             let! result = unfollowUserWorkflow.Execute(currentUserName, userNameToUnfollow)

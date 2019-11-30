@@ -73,8 +73,8 @@ module Errors =
     let valueOrException (result: Result< 'a, ValidationError>) : 'a =
         match result with
         | Ok v -> v
-        | Error e -> throwOnValidationError typeof<'a>.Name e
-    
+        | Error e -> throwOnValidationError typeof<'a>.Name e        
+        
     (*
     Some type aliases for making code more readable and for preventing
     typo-kind of mistakes: so you don't devlare a validation function with
