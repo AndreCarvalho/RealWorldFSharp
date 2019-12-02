@@ -2,11 +2,6 @@ namespace RealWorldFSharp
 
 open Articles.Domain
 open System
-open System
-open System
-open System
-open System
-open System
 open System.Collections.Generic
 open RealWorldFSharp.Domain
 open RealWorldFSharp.Common
@@ -63,6 +58,20 @@ module QueryModels =
     type ArticleModelEnvelope = {
         Article: ArticleModel
     }
+    
+    [<CLIMutable>]
+    type CommentModel = {
+        Id: string
+        Body: string
+        CreatedAt: DateTimeOffset
+        UpdatedAt: DateTimeOffset
+        Author: ProfileModel
+    }
+    
+    type SingleCommentModelEnvelope = {
+        Comment: CommentModel
+    }
+    
     let toUserModelEnvelope token (userInfo: UserInfo) =
         {
             User = {
@@ -84,7 +93,10 @@ module QueryModels =
         
     let toProfileModel (userFollowing: UserFollowing) (userInfo: UserInfo) =
         let model = toSimpleProfileModel userInfo
-        { model with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }
+        if userFollowing.Id <> userInfo.Id then
+            { model with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }
+        else
+            model
         
     let toSimpleProfileModelEnvelope (userInfo: UserInfo) =
         {
@@ -111,4 +123,15 @@ module QueryModels =
     let toSingleArticleEnvelope profileModel article =
         {
             Article = toArticleModel profileModel article
+        }
+        
+    let toCommentModelEnvelope profileModel (comment: Comment) =
+        {
+            Comment = {
+                Id = comment.Id.ToString()
+                CreatedAt = comment.CreatedAt
+                UpdatedAt = comment.UpdatedAt
+                Body = comment.Body.Value
+                Author = profileModel
+            }
         }

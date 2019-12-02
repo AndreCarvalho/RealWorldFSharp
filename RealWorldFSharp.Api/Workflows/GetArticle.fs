@@ -18,8 +18,8 @@ type GetArticleWorkflow (
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! userInfoOption = DataPipeline.getUserInfoById userManager article.UserId 
-            let! (userInfo, _) = noneToError userInfoOption article.UserId.Value |> expectDataRelatedError
+            let! userInfoOption = DataPipeline.getUserInfoById userManager article.AuthorUserId 
+            let! (userInfo, _) = noneToError userInfoOption article.AuthorUserId.Value |> expectDataRelatedError
 
             let! profileModel =
                 match currentUsernameOption with

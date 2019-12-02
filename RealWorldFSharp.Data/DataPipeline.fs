@@ -23,6 +23,7 @@ module DataPipeline =
     type UpdateArticle = Article -> IoResult<unit>
     type GetArticle = Slug -> IoQueryResult<Article>
     type DeleteArticle = Article -> IoResult<unit>
+    type AddComment = Comment -> IoResult<unit>
 
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
@@ -127,4 +128,11 @@ module DataPipeline =
             asyncResult {
                 let entity = article |> DomainToEntityMapping.mapArticleToEntity
                 do! CommandRepository.deleteArticle dbContext entity
+            }
+            
+    let addComment (dbContext: ApplicationDbContext) : AddComment =
+        fun comment ->
+            asyncResult {
+                let entity = comment |> DomainToEntityMapping.mapCommentToEntity
+                do! CommandRepository.addComment dbContext entity
             }

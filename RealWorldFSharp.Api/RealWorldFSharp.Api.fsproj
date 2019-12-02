@@ -20,11 +20,13 @@
         <Compile Include="Workflows\GetArticle.fs" />
         <Compile Include="Workflows\DeleteArticle.fs" />
         <Compile Include="Workflows\UpdateArticle.fs" />
+        <Compile Include="Workflows\AddComment.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />
         <Compile Include="Controllers\ProfilesController.fs" />
         <Compile Include="Controllers\ArticlesController.fs" />
+        <Compile Include="Controllers\CommentsController.fs" />
         <Folder Include="Middleware" />
         <Compile Include="Startup.fs" />
         <Compile Include="Program.fs" />

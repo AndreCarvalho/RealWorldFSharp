@@ -31,7 +31,7 @@ module DomainToEntityMapping =
             Slug = article.Slug.Value,
             Description = article.Description.Value,
             Body = article.Body.Value,
-            UserId = article.UserId.Value,
+            UserId = article.AuthorUserId.Value,
             CreatedAt = article.CreatedAt,
             UpdatedAt = article.UpdatedAt,
             Tags = new List<ArticleTagEntity>(tags)
@@ -39,3 +39,13 @@ module DomainToEntityMapping =
         
     let mapTagToEntity articleId (tag:Tag): ArticleTagEntity =
         ArticleTagEntity(ArticleId = articleId, Tag = tag.Value)
+
+    let mapCommentToEntity (comment: Comment) : CommentEntity =
+        CommentEntity(
+                         Id = comment.Id.ToString(),
+                         Body = comment.Body.Value,
+                         ArticleId = comment.ArticleId.ToString(),
+                         UserId = comment.AuthorUserId.Value,
+                         CreatedAt = comment.CreatedAt,
+                         UpdatedAt = comment.UpdatedAt
+                     )

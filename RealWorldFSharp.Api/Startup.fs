@@ -47,6 +47,7 @@ type Startup private () =
         services.AddTransient<GetArticleWorkflow>() |> ignore
         services.AddTransient<UpdateArticleWorkflow>() |> ignore
         services.AddTransient<DeleteArticleWorkflow>() |> ignore
+        services.AddTransient<AddCommentWorkflow>() |> ignore
         
         let appSettingsSection = this.Configuration.GetSection "JwtConfiguration"
         services.Configure<JwtConfiguration> appSettingsSection |> ignore

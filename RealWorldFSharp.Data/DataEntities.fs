@@ -11,7 +11,6 @@ module DataEntities =
     [<AllowNullLiteral>]
     type ApplicationUser() =
         inherit IdentityUser()
-        
         member val Bio:string = null with get, set
         member val ImageUrl:string = null with get, set
         
@@ -21,7 +20,6 @@ module DataEntities =
         FollowedId: string
     }
 
-        
     [<AllowNullLiteral>]
     type ArticleTagEntity() =
         [<Key>]
@@ -41,7 +39,15 @@ module DataEntities =
             member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
             member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
             member val Tags: List<ArticleTagEntity> = null with get, set
-        
+            
+    type CommentEntity() =
+        [<Key>]
+        member val Id: string = null with get, set
+        member val Body: string = null with get, set
+        member val ArticleId: string = null with get, set
+        member val UserId: string = null with get, set
+        member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+        member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
     
     type ApplicationDbContext(options:DbContextOptions<ApplicationDbContext>) =
         inherit IdentityDbContext<ApplicationUser, IdentityRole, string>(options)
@@ -49,6 +55,7 @@ module DataEntities =
         [<DefaultValue>] val mutable usersFollowing: DbSet<UserFollowing>
         [<DefaultValue>] val mutable articles: DbSet<ArticleEntity>        
         [<DefaultValue>] val mutable articleTags: DbSet<ArticleTagEntity>
+        [<DefaultValue>] val mutable comments: DbSet<CommentEntity>
                 
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
@@ -66,10 +73,12 @@ module DataEntities =
         member x.Articles
             with get() = x.articles
             and set v = x.articles <- v
-            
         member x.ArticleTags
             with get() = x.articleTags
             and set v = x.articleTags <- v
+        member x.Comments
+            with get() = x.comments
+            and set v = x.comments <- v
 
     type EmailAddress = string
     type Password = string

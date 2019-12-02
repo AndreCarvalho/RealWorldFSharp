@@ -69,6 +69,16 @@ module CommandModels =
          Article: UpdateArticleCommandModel
     }
     
+    [<CLIMutable>]
+    type AddCommentToArticleCommandModel = {
+        Body: string
+    }
+        
+    [<CLIMutable>]
+    type AddCommentToArticleCommandModelEnvelope = {
+        Comment: AddCommentToArticleCommandModel
+    }
+            
     type AuthenticateUserCommand = {
         EmailAddress: EmailAddress
         Password: Password
@@ -84,14 +94,18 @@ module CommandModels =
     type CreateArticleCommand = {
         Title: Title
         Description: Description
-        Body: Body
+        Body: ArticleBody
         Tags: Tag list
     }
     
     type UpdateArticleCommand = {
         Title: Title option
         Description: Description option
-        Body: Body option
+        Body: ArticleBody option
+    }
+    
+    type AddCommentToArticleCommand = {
+        Body: CommentBody
     }
     
     type ValidateRegisterNewUserCommand = RegisterNewUserCommandModel -> ValidationResult<UserInfo * Password>
@@ -99,6 +113,7 @@ module CommandModels =
     type ValidateUpdateUserCommand = UpdateUserCommandModel -> ValidationResult<UpdateUserCommand>
     type ValidateCreateArticleCommand = CreateArticleCommandModel -> ValidationResult<CreateArticleCommand>
     type ValidateUpdateArticleCommand = UpdateArticleCommandModel -> ValidationResult<UpdateArticleCommand>
+    type ValidateAddCommentToArticleCommand = AddCommentToArticleCommandModel -> ValidationResult<AddCommentToArticleCommand>
 
                 
     let private validateOptional validation value =
@@ -154,7 +169,7 @@ module CommandModels =
             result {
                 let! title = Title.create "title" command.Title 
                 let! description = Description.create "description" command.Description 
-                let! body = Body.create "body" command.Body
+                let! body = ArticleBody.create "body" command.Body
                 
                 let tags = if (isNull command.TagList) then [||] else command.TagList
                 let! validatedTags = tags |> Array.map (Tag.create "tag") |> List.ofArray |> Result.combine
@@ -172,11 +187,21 @@ module CommandModels =
             result {
                 let! title = command.Title |> validateOptional (Title.create "title")
                 let! description = command.Description |> validateOptional (Description.create "description") 
-                let! body = command.Body |> validateOptional (Body.create "body")
+                let! body = command.Body |> validateOptional (ArticleBody.create "body")
 
                 return {
                     Title = title
                     Description = description
+                    Body = body
+                }
+            }
+            
+    let validateAddCommentToArticleCommand : ValidateAddCommentToArticleCommand =
+        fun command ->
+            result {
+                let! body = command.Body |> CommentBody.create "body"
+                
+                return {
                     Body = body
                 }
             }

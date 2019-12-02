@@ -30,7 +30,7 @@ module Domain =
             else
                 Ok <| Description description
                 
-    type Body = private Body of string
+    type ArticleBody = private Body of string
         with
         member this.Value = match this with Body bo -> bo
         static member create fieldName body =
@@ -66,9 +66,31 @@ module Domain =
         Title: Title
         Slug: Slug
         Description: Description
-        Body: Body
+        Body: ArticleBody
         Tags: Tag list
-        UserId: UserId
+        AuthorUserId: UserId
+        CreatedAt: DateTimeOffset
+        UpdatedAt: DateTimeOffset
+    }
+    
+    type CommentBody = private CommentBody of string
+        with
+        member this.Value = match this with CommentBody comment -> comment
+        static member create fieldName comment =
+            if isNullOrEmpty comment then
+                validationError fieldName "comment must not be null or empty"
+            elif length comment > 200 then
+                validationError fieldName "comment can not have more than 200 characters"
+            else
+                Ok <| CommentBody comment
+               
+    type CommentId = Guid
+ 
+    type Comment = {
+        Id: CommentId
+        Body: CommentBody
+        ArticleId : ArticleId
+        AuthorUserId: UserId
         CreatedAt: DateTimeOffset
         UpdatedAt: DateTimeOffset
     }
@@ -90,7 +112,7 @@ module Domain =
             Tags = tags
             CreatedAt = dateTime
             UpdatedAt = dateTime
-            UserId = userId
+            AuthorUserId = userId
         }
         
     let updateArticle titleOption bodyOption descriptionOption dateTime article =
@@ -103,8 +125,19 @@ module Domain =
         }
         
         
-    let validateDeleteArticle article (user:UserInfo) =
-        if article.UserId = user.Id then
+    let validateDeleteArticle (article:Article) (user:UserInfo) =
+        if article.AuthorUserId = user.Id then
             Ok article
         else
             operationNotAllowed "Delete article" "Not article creator"
+            
+    let createComment commentBody (article:Article) (userInfo:UserInfo) dateTime =
+        {
+            Id = Guid.NewGuid()
+            Body = commentBody
+            CreatedAt = dateTime
+            UpdatedAt = dateTime
+            ArticleId = article.Id
+            AuthorUserId = userInfo.Id
+        }
+        

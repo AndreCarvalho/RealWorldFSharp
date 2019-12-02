@@ -8,7 +8,6 @@ open RealWorldFSharp.Api.Http
 open RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.CommandModels
 
-
 [<Authorize>]
 [<ApiController>]
 [<Route("api/articles")>]

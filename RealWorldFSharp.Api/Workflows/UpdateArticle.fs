@@ -28,8 +28,8 @@ type UpdateArticleWorkflow (
             do! DataPipeline.updateArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            let! userInfoOption = DataPipeline.getUserInfoById userManager article.UserId 
-            let! (userInfo, _) = noneToError userInfoOption article.UserId.Value |> expectDataRelatedError
+            let! userInfoOption = DataPipeline.getUserInfoById userManager article.AuthorUserId 
+            let! (userInfo, _) = noneToError userInfoOption article.AuthorUserId.Value |> expectDataRelatedError
             
             return article |> QueryModels.toSingleArticleEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
         }

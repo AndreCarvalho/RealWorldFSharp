@@ -47,7 +47,7 @@ module EntityToDomainMapping =
             let! title = Title.create "title" articleEntity.Title
             let slug = Slug.create articleEntity.Slug
             let! description = Description.create "description" articleEntity.Description
-            let! body = Body.create "body" articleEntity.Body
+            let! body = ArticleBody.create "body" articleEntity.Body
             let! tags = articleEntity.Tags
                        |> Option.ofObj
                        |> Option.map List.ofSeq
@@ -66,7 +66,7 @@ module EntityToDomainMapping =
                 Description = description
                 Body = body
                 Tags = tags
-                UserId = userId
+                AuthorUserId = userId
                 CreatedAt = createdAt
                 UpdatedAt = updatedAt
             }
