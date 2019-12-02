@@ -54,7 +54,7 @@ type ArticlesController (
     [<AllowAnonymous>]
     [<Route("{articleSlug}")>]
     member self.GetArticle(articleSlug: string) =
-        let username = base.HttpContext |> Http.getUserName
+        let username = base.HttpContext |> Http.getUserNameOption
                         
         async {
             let! result = getArticleWorkflow.Execute(username, articleSlug)

@@ -31,5 +31,5 @@ type UpdateArticleWorkflow (
             let! userInfoOption = DataPipeline.getUserInfoById userManager article.UserId 
             let! (userInfo, _) = noneToError userInfoOption article.UserId.Value |> expectDataRelatedError
             
-            return article |> QueryModels.toSingleArticleEnvelope userInfo
+            return article |> QueryModels.toSingleArticleEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
         }

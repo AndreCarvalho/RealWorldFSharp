@@ -29,5 +29,5 @@ type CreateArticleWorkflow (
             do! DataPipeline.addArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            return article |> QueryModels.toSingleArticleEnvelope userInfo
+            return article |> QueryModels.toSingleArticleEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
         }

@@ -12,7 +12,7 @@ type GetArticleWorkflow (
                            dbContext: ApplicationDbContext,
                            userManager: UserManager<ApplicationUser>
                         ) =
-    member __.Execute(username, articleSlug) = // TODO: handle login case
+    member __.Execute(currentUsernameOption, articleSlug) =           
         asyncResult {
             let slug = Slug.create articleSlug
             let! articleOption = DataPipeline.getArticle dbContext slug
@@ -21,5 +21,15 @@ type GetArticleWorkflow (
             let! userInfoOption = DataPipeline.getUserInfoById userManager article.UserId 
             let! (userInfo, _) = noneToError userInfoOption article.UserId.Value |> expectDataRelatedError
 
-            return article |> QueryModels.toSingleArticleEnvelope userInfo
+            let! profileModel =
+                match currentUsernameOption with
+                | Some currentUsername ->
+                    asyncResult {
+                        let! userFollowing = currentUsername |> Helper.getUserFollowing dbContext userManager 
+                        return userInfo |> QueryModels.toProfileModel userFollowing
+                    }
+                | None ->
+                    userInfo |> QueryModels.toSimpleProfileModel |> AsyncResult.retn
+            
+            return article |> QueryModels.toSingleArticleEnvelope profileModel
         }

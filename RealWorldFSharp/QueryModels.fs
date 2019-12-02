@@ -82,6 +82,10 @@ module QueryModels =
             Following = Nullable.empty<bool> 
         }
         
+    let toProfileModel (userFollowing: UserFollowing) (userInfo: UserInfo) =
+        let model = toSimpleProfileModel userInfo
+        { model with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }
+        
     let toSimpleProfileModelEnvelope (userInfo: UserInfo) =
         {
             Profile = toSimpleProfileModel userInfo
@@ -89,9 +93,9 @@ module QueryModels =
         
     let toProfileModelEnvelope (userFollowing: UserFollowing) (userInfo: UserInfo)  =
         let envelope = toSimpleProfileModelEnvelope userInfo
-        { envelope with Profile = { envelope.Profile with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }}
+        { envelope with Profile = userInfo |> toProfileModel userFollowing }
 
-    let toArticleModel (userInfo: UserInfo) (article: Article) =
+    let toArticleModel (profileModel: ProfileModel) (article: Article) =
         {
             Slug = article.Slug.Value
             Title = article.Title.Value
@@ -102,9 +106,9 @@ module QueryModels =
             UpdatedAt = article.UpdatedAt
             Favorited = false //TODO
             FavoritesCount = 0 //TODO
-            Author = toSimpleProfileModel userInfo
+            Author = profileModel
         }
-    let toSingleArticleEnvelope userInfo article =
+    let toSingleArticleEnvelope profileModel article =
         {
-            Article = toArticleModel userInfo article
+            Article = toArticleModel profileModel article
         }
