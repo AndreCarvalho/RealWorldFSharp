@@ -13,23 +13,21 @@ type UnfollowUserWorkflow(
                            dbContext: ApplicationDbContext,
                            userManager: UserManager<ApplicationUser>
                        ) =
-    member __.Execute(currentUserName, userNameToUnfollow) =
+    member __.Execute(currentUserId, userNameToUnfollow) =
         asyncResult {
             let! usernameToUnfollow = Username.create "username" userNameToUnfollow |> expectValidationError
-            let currentUsername = Username.create "username" currentUserName |> valueOrException
 
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToUnfollow 
             let! (userInfoToUnfollow, _) = noneToUserNotFoundError userInfoOption usernameToUnfollow.Value |> expectUsersError
             
-            let! currentUserInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername
-            let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
+            let userId = currentUserId |> (UserId.create "userId") |> valueOrException
             
             dbContext.ChangeTracker.QueryTrackingBehavior <- QueryTrackingBehavior.NoTracking
-            let! userFollowing = DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
+            let! userFollowing = DataPipeline.getUserFollowing dbContext userId |> expectDataRelatedErrorAsync
             
             let (userFollowing, result) = removeFromUserFollowing userInfoToUnfollow.Id userFollowing
             if result = Removed then
-                do! DataPipeline.removeUserFollowing dbContext (currentUserInfo.Id, userInfoToUnfollow.Id) |> expectDataRelatedErrorAsync
+                do! DataPipeline.removeUserFollowing dbContext (userId, userInfoToUnfollow.Id) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
                 
             return userInfoToUnfollow |> toProfileModelEnvelope userFollowing

@@ -37,12 +37,24 @@ module Http =
         | Ok x -> controller.Ok(x) :> IActionResult
         | Error err -> errorToActionResult controller err
         
-    let getUserNameOption (httpContext: HttpContext) =
+
+    let private tryGetFromUserClaims (httpContext: HttpContext) claim =
         httpContext.User.Claims
-        |> Seq.tryFind (fun x -> x.Type = ClaimTypes.Name)
+        |> Seq.tryFind (fun x -> x.Type = claim)
         |> Option.map (fun x -> x.Value)
+        
+    let getUserNameOption (httpContext: HttpContext) =
+        tryGetFromUserClaims httpContext ClaimTypes.Name
         
     let getUserName (httpContext: HttpContext) =
         httpContext
         |> getUserNameOption
         |> Option.valueOrException "could not find username in Claims"
+        
+    let getUserIdOption (httpContext: HttpContext) =
+        tryGetFromUserClaims httpContext ClaimTypes.NameIdentifier
+        
+    let getUserId (httpContext: HttpContext) =
+        httpContext
+        |> getUserIdOption
+        |> Option.valueOrException "could not find user Id in Claims"

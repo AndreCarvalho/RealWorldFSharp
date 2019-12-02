@@ -15,13 +15,9 @@ type AddCommentWorkflow (
                                dbContext: ApplicationDbContext,
                                userManager: UserManager<ApplicationUser>
                            ) =
-    member __.Execute(username, articleSlug, command: AddCommentToArticleCommandModel) =
+    member __.Execute(userId, articleSlug, command: AddCommentToArticleCommandModel) =
         asyncResult {
-            let currentUsername = Username.create "username" username |> valueOrException
-            let! userInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername 
-            let! (userInfo, _) = noneToUserNotFoundError userInfoOption currentUsername.Value |> expectUsersError
-            
-            // TODO: store userId in token??
+            let userId = UserId.create "userId" userId |> valueOrException
             
             let slug = Slug.create articleSlug
             let! articleOption = DataPipeline.getArticle dbContext slug
@@ -31,9 +27,9 @@ type AddCommentWorkflow (
             let! (authorUserInfo, _) = noneToUserNotFoundError authorUserOption article.AuthorUserId.Value |> expectUsersError
             
             let! cmd = validateAddCommentToArticleCommand command |> expectValidationError
-            let comment = createComment cmd.Body article userInfo DateTimeOffset.UtcNow
+            let comment = createComment cmd.Body article userId DateTimeOffset.UtcNow
             
-            let! userFollowing = username |> Helper.getUserFollowing dbContext userManager
+            let! userFollowing = userId |> Helper.getUserFollowing dbContext userManager
             
             do! comment |> DataPipeline.addComment dbContext |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()

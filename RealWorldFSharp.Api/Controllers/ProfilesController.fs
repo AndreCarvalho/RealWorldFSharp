@@ -21,29 +21,29 @@ type ProfilesController(
     [<AllowAnonymous>]
     [<Route("{userName}")>]
     member x.Get(userName: string) =
-        let currentUserName = base.HttpContext |> Http.getUserNameOption
+        let currentUserId = base.HttpContext |> Http.getUserIdOption
                                 
         async {
-            let! result = retrieveProfileWorkflow.Execute(currentUserName, userName)
+            let! result = retrieveProfileWorkflow.Execute(currentUserId, userName)
             return result |> resultToActionResult x
         } |> Async.StartAsTask
         
     [<HttpPost>]
     [<Route("{userNameToFollow}/follow")>]
     member x.Follow(userNameToFollow: string) =
-        let currentUserName = base.HttpContext |> Http.getUserName
+        let currentUserId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = followUserWorkflow.Execute(currentUserName, userNameToFollow)
+            let! result = followUserWorkflow.Execute(currentUserId, userNameToFollow)
             return result |> resultToActionResult x
         } |> Async.StartAsTask
         
     [<HttpDelete>]
     [<Route("{userNameToUnfollow}/follow")>]
     member x.Unfollow(userNameToUnfollow: string) =
-        let currentUserName = base.HttpContext |> Http.getUserName
+        let currentUserId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = unfollowUserWorkflow.Execute(currentUserName, userNameToUnfollow)
+            let! result = unfollowUserWorkflow.Execute(currentUserId, userNameToUnfollow)
             return result |> resultToActionResult x
         } |> Async.StartAsTask

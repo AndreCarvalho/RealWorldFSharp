@@ -125,19 +125,19 @@ module Domain =
         }
         
         
-    let validateDeleteArticle (article:Article) (user:UserInfo) =
-        if article.AuthorUserId = user.Id then
+    let validateDeleteArticle (article:Article) userId =
+        if article.AuthorUserId = userId then
             Ok article
         else
             operationNotAllowed "Delete article" "Not article creator"
             
-    let createComment commentBody (article:Article) (userInfo:UserInfo) dateTime =
+    let createComment commentBody (article:Article) userId dateTime =
         {
             Id = Guid.NewGuid()
             Body = commentBody
             CreatedAt = dateTime
             UpdatedAt = dateTime
             ArticleId = article.Id
-            AuthorUserId = userInfo.Id
+            AuthorUserId = userId
         }
         

@@ -19,9 +19,9 @@ type CommentsController (
     [<HttpPost>]
     [<Route("")>]
     member self.AddComment(articleSlug: string, commandModelEnvelope: AddCommentToArticleCommandModelEnvelope) =
-        let username = base.HttpContext |> Http.getUserName
+        let userId = base.HttpContext |> Http.getUserId
         
         async {
-            let! result = addCommentWorkflow.Execute(username, articleSlug, commandModelEnvelope.Comment)
+            let! result = addCommentWorkflow.Execute(userId, articleSlug, commandModelEnvelope.Comment)
             return result |> resultToActionResult self
         } |> Async.StartAsTask

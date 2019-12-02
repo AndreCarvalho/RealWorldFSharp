@@ -12,17 +12,18 @@ type RetrieveProfileWorkflow(
                                 dbContext: ApplicationDbContext,
                                 userManager: UserManager<ApplicationUser>
                             ) =
-    member __.Execute(currentUsernameOption, profileUserName) =           
+    member __.Execute(currentUserIdOption, profileUserName) =           
         asyncResult {
             let! profileUsername = Username.create "username" profileUserName |> expectValidationError
             let! profileUserInfoOption = DataPipeline.getUserInfoByUsername userManager profileUsername 
             let! (profileUserInfo, _) = noneToUserNotFoundError profileUserInfoOption profileUsername.Value |> expectUsersError
             
             return!
-                match currentUsernameOption with
-                | Some currentUsername ->
+                match currentUserIdOption with
+                | Some currentUserId ->
                     asyncResult {
-                        let! userFollowing = currentUsername |> Helper.getUserFollowing dbContext userManager 
+                        let userId = currentUserId |> ( UserId.create "userId") |> valueOrException
+                        let! userFollowing = userId |> Helper.getUserFollowing dbContext userManager 
                         return profileUserInfo |> toProfileModelEnvelope userFollowing
                     }
                 | None -> profileUserInfo |> toSimpleProfileModelEnvelope |> AsyncResult.retn

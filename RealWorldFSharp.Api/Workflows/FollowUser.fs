@@ -12,22 +12,19 @@ type FollowUserWorkflow(
                            dbContext: ApplicationDbContext,
                            userManager: UserManager<ApplicationUser>
                        ) =
-    member __.Execute(currentUserName, userNameToFollow) =
+    member __.Execute(currentUserId, userNameToFollow) =
         asyncResult {
             let! usernameToFollow = Username.create "username" userNameToFollow |> expectValidationError
-            let currentUsername = Username.create "username" currentUserName |> valueOrException
-
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToFollow 
             let! (userInfoToFollow, _) = noneToUserNotFoundError userInfoOption usernameToFollow.Value |> expectUsersError
             
-            let! currentUserInfoOption = DataPipeline.getUserInfoByUsername userManager currentUsername
-            let! (currentUserInfo, _) = noneToUserNotFoundError currentUserInfoOption currentUsername.Value |> expectUsersError
-            
-            let! userFollowing = DataPipeline.getUserFollowing dbContext currentUserInfo.Id |> expectDataRelatedErrorAsync
+            let userId = currentUserId |> (UserId.create "userId") |> valueOrException
+
+            let! userFollowing = DataPipeline.getUserFollowing dbContext userId |> expectDataRelatedErrorAsync
             
             let (userFollowing, result) = addToUserFollowing userInfoToFollow.Id userFollowing
             if result = Added then
-                do! DataPipeline.addUserFollowing dbContext (currentUserInfo.Id, userInfoToFollow.Id) |> expectDataRelatedErrorAsync
+                do! DataPipeline.addUserFollowing dbContext (userId, userInfoToFollow.Id) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
             
             return userInfoToFollow |> toProfileModelEnvelope userFollowing

@@ -42,10 +42,10 @@ type ArticlesController (
     [<HttpDelete>]
     [<Route("{articleSlug}")>]
     member self.DeleteArticle(articleSlug: string) =
-        let username = base.HttpContext |> Http.getUserName
+        let currentUserId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = deleteArticleWorkflow.Execute(username, articleSlug)
+            let! result = deleteArticleWorkflow.Execute(currentUserId, articleSlug)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         
@@ -53,10 +53,10 @@ type ArticlesController (
     [<AllowAnonymous>]
     [<Route("{articleSlug}")>]
     member self.GetArticle(articleSlug: string) =
-        let username = base.HttpContext |> Http.getUserNameOption
+        let userId = base.HttpContext |> Http.getUserIdOption
                         
         async {
-            let! result = getArticleWorkflow.Execute(username, articleSlug)
+            let! result = getArticleWorkflow.Execute(userId, articleSlug)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
     
