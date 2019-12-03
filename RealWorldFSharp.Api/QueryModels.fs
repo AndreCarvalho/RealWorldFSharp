@@ -2,8 +2,8 @@ namespace RealWorldFSharp.Api
 
 open System
 open System.Collections.Generic
-open RealWorldFSharp.Domain
-open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
 open RealWorldFSharp.Data.ReadModels
 

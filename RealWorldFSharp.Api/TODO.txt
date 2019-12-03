@@ -1,7 +1,9 @@
-- get tags
+- Features
+    - list tags
+    - list articles (with query params)
+    - feed articles
+    - favorite article
+    - un-favorite article
 
-- list articles (with query params)
-- feed articles
-
-- favorite article
-- un-favorite article
+- Improve
+    

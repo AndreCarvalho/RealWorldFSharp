@@ -5,7 +5,7 @@ open Microsoft.IdentityModel.Tokens
 open System.IdentityModel.Tokens.Jwt
 open System.Security.Claims
 open System.Text
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Api.Settings
 
 module Authentication =

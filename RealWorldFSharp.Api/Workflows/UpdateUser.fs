@@ -4,8 +4,7 @@ open RealWorldFSharp.Api
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
-open RealWorldFSharp
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings

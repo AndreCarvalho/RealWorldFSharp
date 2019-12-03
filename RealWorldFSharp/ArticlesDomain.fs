@@ -1,12 +1,11 @@
-namespace RealWorldFSharp.Articles
+namespace RealWorldFSharp.Domain
 
 open System
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Common
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 
-module Domain =
-    let f = 2
+module Articles =
 
     type Title = private Title of string
         with

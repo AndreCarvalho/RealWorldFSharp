@@ -3,11 +3,11 @@ namespace RealWorldFSharp.Api.Workflows
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api
-open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
-open RealWorldFSharp.Domain
 
 type GetArticleWorkflow (
                            dbContext: ApplicationDbContext,

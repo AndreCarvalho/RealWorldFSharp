@@ -4,12 +4,12 @@ open System
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api
-open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
-open RealWorldFSharp.Domain
 
 type AddCommentWorkflow (
                                dbContext: ApplicationDbContext,

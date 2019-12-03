@@ -1,9 +1,9 @@
-﻿namespace RealWorldFSharp
+﻿namespace RealWorldFSharp.Domain
 
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Common
 
-module Domain =
+module Users =
     
     type Username = private Username of string
         with

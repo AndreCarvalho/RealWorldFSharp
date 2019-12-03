@@ -3,14 +3,13 @@ namespace RealWorldFSharp.Api.Workflows
 open System
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open RealWorldFSharp
-open RealWorldFSharp.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Articles
 
 type CreateArticleWorkflow (
                                dbContext: ApplicationDbContext,
@@ -25,7 +24,7 @@ type CreateArticleWorkflow (
             let! cmd = validateCreateArticleCommand command |> expectValidationError
             
             let now = DateTimeOffset.UtcNow
-            let article = Domain.createArticle userInfo.Id cmd.Title cmd.Description cmd.Body cmd.Tags now
+            let article = createArticle userInfo.Id cmd.Title cmd.Description cmd.Body cmd.Tags now
 
             do! DataPipeline.addArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()

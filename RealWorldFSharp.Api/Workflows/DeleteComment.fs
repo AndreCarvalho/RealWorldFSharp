@@ -2,11 +2,11 @@ namespace RealWorldFSharp.Api.Workflows
 
 open System
 open FsToolkit.ErrorHandling
-open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
-open RealWorldFSharp.Domain
 
 type DeleteCommentWorkflow (
                                dbContext: ApplicationDbContext

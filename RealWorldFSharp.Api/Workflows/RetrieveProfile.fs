@@ -6,7 +6,7 @@ open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 
 type RetrieveProfileWorkflow(
                                 dbContext: ApplicationDbContext,

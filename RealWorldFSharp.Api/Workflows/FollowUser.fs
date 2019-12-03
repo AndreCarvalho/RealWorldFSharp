@@ -6,7 +6,7 @@ open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 
 type FollowUserWorkflow(
                            dbContext: ApplicationDbContext,

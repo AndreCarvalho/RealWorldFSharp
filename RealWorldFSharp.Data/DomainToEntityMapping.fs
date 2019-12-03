@@ -2,8 +2,8 @@ namespace RealWorldFSharp.Data
 
 open System.Collections.Generic
 open DataEntities
-open RealWorldFSharp.Articles.Domain
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 
 module DomainToEntityMapping =
     

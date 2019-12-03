@@ -3,9 +3,7 @@ namespace RealWorldFSharp.Api.Workflows
 open System
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open RealWorldFSharp
-open RealWorldFSharp.Articles
-open RealWorldFSharp.Articles.Domain
+open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api
@@ -24,7 +22,7 @@ type UpdateArticleWorkflow (
             
             let! cmd = validateUpdateArticleCommand command |> expectValidationError
             let now = DateTimeOffset.UtcNow
-            let article = article |> Domain.updateArticle cmd.Title cmd.Body cmd.Description now
+            let article = article |> updateArticle cmd.Title cmd.Body cmd.Description now
             
             do! DataPipeline.updateArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()

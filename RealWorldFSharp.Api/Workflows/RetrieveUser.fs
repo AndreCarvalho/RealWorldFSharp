@@ -10,7 +10,7 @@ open RealWorldFSharp.Common.Errors
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Users
 
 
 

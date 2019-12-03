@@ -1,8 +1,8 @@
 namespace RealWorldFSharp.Api.Workflows
 
 open FsToolkit.ErrorHandling
-open RealWorldFSharp.Articles.Domain
-open RealWorldFSharp.Domain
+open RealWorldFSharp.Domain.Articles
+open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
