@@ -13,7 +13,8 @@ open RealWorldFSharp.Api.CommandModels
 [<Route("api/articles/{articleSlug}/comments")>]
 type CommentsController (
                             addCommentWorkflow: AddCommentWorkflow,
-                            getCommentsWorkflow: GetCommentsWorkflow
+                            getCommentsWorkflow: GetCommentsWorkflow,
+                            deleteCommentWorkflow: DeleteCommentWorkflow
                         ) =
     inherit Controller()
     
@@ -36,5 +37,16 @@ type CommentsController (
         
         async {
             let! result = getCommentsWorkflow.Execute(userIdOption, articleSlug)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+        
+        
+    [<HttpDelete>]
+    [<Route("{commentId}")>]
+    member self.DeleteComment(articleSlug: string, commentId: string) =
+        let userId = base.HttpContext |> Http.getUserId
+        
+        async {
+            let! result = deleteCommentWorkflow.Execute(userId, articleSlug, commentId)
             return result |> resultToActionResult self
         } |> Async.StartAsTask

@@ -13,7 +13,7 @@ module QueryRepository =
     type GetApplicationUserById = UserManager<ApplicationUser> -> UserId -> IoQueryResult<ApplicationUser>
     type GetUserFollowing = ApplicationDbContext -> UserId -> IoResult<UserFollowingEntity>
     type GetArticle = ApplicationDbContext -> Slug -> IoQueryResult<ArticleEntity>
-    type GetArticleComments = ApplicationDbContext -> ArticleId -> IoResult<ArticleCommentsEntity seq>
+    type GetComment = ApplicationDbContext -> CommentId -> IoQueryResult<ArticleCommentEntity>
 
     let getApplicationUserByUsername : GetApplicationUserByUsername =
         fun userManager username ->
@@ -62,14 +62,15 @@ module QueryRepository =
                 return Option.ofObj articleQuery
             }
             
-    let getArticleComments : GetArticleComments =
-        fun dbContext articleId ->
+    let getComment : GetComment =
+        fun dbContext commentId ->
             async {
-                let commentsQuery = query {
+                let articleQuery = query {
                     for c in dbContext.ArticleComments.AsNoTracking() do
-                    where (c.ArticleId = articleId)
+                    where (c.Id = commentId)
                     select c
+                    exactlyOneOrDefault
                 }
                 
-                return Ok (commentsQuery |> Seq.map id)
+                return Option.ofObj articleQuery
             }

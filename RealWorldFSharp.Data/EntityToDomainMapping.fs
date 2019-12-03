@@ -75,7 +75,7 @@ module EntityToDomainMapping =
     let mapArticle article =
         validateArticle article |> valueOrException
         
-    let validateComment (commentEntity:ArticleCommentsEntity) =
+    let validateComment (commentEntity:ArticleCommentEntity) =
         result {
             let id = commentEntity.Id |> Guid.Parse
             let! body = CommentBody.create "body" commentEntity.Body

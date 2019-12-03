@@ -24,8 +24,9 @@ module DataPipeline =
     type GetArticle = Slug -> IoQueryResult<Article>
     type DeleteArticle = Article -> IoResult<unit>
     type AddComment = Comment -> IoResult<unit>
-    type GetArticleComments = ArticleId -> IoResult<Comment seq>
-
+    type GetComment = CommentId -> IoQueryResult<Comment>
+    type DeleteComment = Comment -> IoResult<unit>
+    
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
             let applicationUser = userInfo |> DomainToEntityMapping.mapUserInfoToApplicationUser
@@ -138,9 +139,16 @@ module DataPipeline =
                 do! CommandRepository.addComment dbContext entity
             }
             
-    let getArticleComments (dbContext: ApplicationDbContext) : GetArticleComments =
-        fun articleId ->
+    let getComment (dbContext: ApplicationDbContext) : GetComment =
+        fun commentId ->
             async {
-                let! result = QueryRepository.getArticleComments dbContext (articleId.ToString())
-                return result |> Result.map (Seq.map EntityToDomainMapping.mapCommentEntity) 
+                let! entity = QueryRepository.getComment dbContext (commentId.ToString())
+                return entity |> Option.map (EntityToDomainMapping.mapCommentEntity)
+            }
+            
+    let deleteComment (dbContext: ApplicationDbContext) : DeleteComment =
+        fun comment ->
+            asyncResult {
+                let entity = comment |> DomainToEntityMapping.mapCommentToEntity
+                do! CommandRepository.deleteComment dbContext entity
             }

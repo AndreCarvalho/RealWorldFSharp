@@ -40,7 +40,8 @@ module DataEntities =
             member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
             member val Tags: List<ArticleTagEntity> = null with get, set
             
-    type ArticleCommentsEntity() =
+    [<AllowNullLiteral>]
+    type ArticleCommentEntity() =
         [<Key>]
         member val Id: string = null with get, set
         member val Body: string = null with get, set
@@ -55,7 +56,7 @@ module DataEntities =
         [<DefaultValue>] val mutable usersFollowing: DbSet<UserFollowing>
         [<DefaultValue>] val mutable articles: DbSet<ArticleEntity>        
         [<DefaultValue>] val mutable articleTags: DbSet<ArticleTagEntity>
-        [<DefaultValue>] val mutable articleComments: DbSet<ArticleCommentsEntity>
+        [<DefaultValue>] val mutable articleComments: DbSet<ArticleCommentEntity>
                 
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
@@ -88,6 +89,7 @@ module DataEntities =
     
     type ArticleId = string
     type Slug = string
+    type CommentId = string
     
     type UserFollowingEntity = {
         Id: string

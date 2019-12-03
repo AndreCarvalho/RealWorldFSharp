@@ -53,7 +53,7 @@ module Domain =
             else
                 Ok <| Tag tag
 
-    type ArticleId = Guid
+    type ArticleId = Guid  // TODO expand with private ctor and factory with validation
     
     type Slug = private Slug of string
         with
@@ -84,7 +84,7 @@ module Domain =
             else
                 Ok <| CommentBody comment
                
-    type CommentId = Guid
+    type CommentId = Guid // TODO expand with private ctor and factory with validation
  
     type Comment = {
         Id: CommentId
@@ -129,7 +129,7 @@ module Domain =
         if article.AuthorUserId = userId then
             Ok article
         else
-            operationNotAllowed "Delete article" "Not article creator"
+            operationNotAllowed "Delete article" "Not article author"
             
     let createComment commentBody (article:Article) userId dateTime =
         {
@@ -140,4 +140,10 @@ module Domain =
             ArticleId = article.Id
             AuthorUserId = userId
         }
+        
+    let validateDeleteComment (comment:Comment) userId =
+        if comment.AuthorUserId = userId then
+            Ok comment
+        else
+            operationNotAllowed "Delete comment" "Not comment author"
         

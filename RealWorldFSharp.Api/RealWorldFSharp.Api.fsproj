@@ -24,6 +24,7 @@
         <Compile Include="Workflows\UpdateArticle.fs" />
         <Compile Include="Workflows\AddComment.fs" />
         <Compile Include="Workflows\GetComments.fs" />
+        <Compile Include="Workflows\DeleteComment.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />

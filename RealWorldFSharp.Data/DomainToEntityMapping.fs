@@ -40,8 +40,8 @@ module DomainToEntityMapping =
     let mapTagToEntity articleId (tag:Tag): ArticleTagEntity =
         ArticleTagEntity(ArticleId = articleId, Tag = tag.Value)
 
-    let mapCommentToEntity (comment: Comment) : ArticleCommentsEntity =
-        ArticleCommentsEntity(
+    let mapCommentToEntity (comment: Comment) : ArticleCommentEntity =
+        ArticleCommentEntity(
                          Id = comment.Id.ToString(),
                          Body = comment.Body.Value,
                          ArticleId = comment.ArticleId.ToString(),
