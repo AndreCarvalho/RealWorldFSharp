@@ -1,8 +1,8 @@
-namespace RealWorldFSharp
+namespace RealWorldFSharp.Api
 
-open Articles.Domain
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Domain
+open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Common
 open RealWorldFSharp.Common.Errors
 

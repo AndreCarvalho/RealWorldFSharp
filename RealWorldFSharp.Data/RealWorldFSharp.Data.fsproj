@@ -11,6 +11,8 @@
         <Compile Include="CommandRepository.fs" />
         <Compile Include="QueryRepository.fs" />
         <Compile Include="DataPipeline.fs" />
+        <Compile Include="Read\ReadDataContext.fs" />
+        <Compile Include="Read\ReadQueries.fs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -7,6 +7,8 @@
     <ItemGroup>
         <Compile Include="Configuration.fs" />
         <Compile Include="Authentication.fs" />
+        <Compile Include="CommandModels.fs" />
+        <Compile Include="QueryModels.fs" />
         <Compile Include="Http.fs" />
         <Compile Include="Workflows\Helper.fs" />
         <Compile Include="Workflows\RegisterNewUser.fs" />

@@ -2,7 +2,7 @@ namespace RealWorldFSharp.Api.Workflows
 
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
-open RealWorldFSharp.QueryModels
+open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities

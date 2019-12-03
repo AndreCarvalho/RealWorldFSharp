@@ -40,7 +40,7 @@ module DataEntities =
             member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
             member val Tags: List<ArticleTagEntity> = null with get, set
             
-    type CommentEntity() =
+    type ArticleCommentsEntity() =
         [<Key>]
         member val Id: string = null with get, set
         member val Body: string = null with get, set
@@ -55,7 +55,7 @@ module DataEntities =
         [<DefaultValue>] val mutable usersFollowing: DbSet<UserFollowing>
         [<DefaultValue>] val mutable articles: DbSet<ArticleEntity>        
         [<DefaultValue>] val mutable articleTags: DbSet<ArticleTagEntity>
-        [<DefaultValue>] val mutable comments: DbSet<CommentEntity>
+        [<DefaultValue>] val mutable articleComments: DbSet<ArticleCommentsEntity>
                 
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
@@ -76,9 +76,9 @@ module DataEntities =
         member x.ArticleTags
             with get() = x.articleTags
             and set v = x.articleTags <- v
-        member x.Comments
-            with get() = x.comments
-            and set v = x.comments <- v
+        member x.ArticleComments
+            with get() = x.articleComments
+            and set v = x.articleComments <- v
 
     type EmailAddress = string
     type Password = string

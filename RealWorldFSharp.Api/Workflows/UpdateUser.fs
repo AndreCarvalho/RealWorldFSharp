@@ -6,11 +6,11 @@ open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
 open RealWorldFSharp
 open RealWorldFSharp.Domain
-open RealWorldFSharp.QueryModels
+open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Data
 open RealWorldFSharp.Data.DataEntities
 

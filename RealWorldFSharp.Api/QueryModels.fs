@@ -1,9 +1,9 @@
-namespace RealWorldFSharp
+namespace RealWorldFSharp.Api
 
-open Articles.Domain
 open System
 open System.Collections.Generic
 open RealWorldFSharp.Domain
+open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Common
 
 module QueryModels =

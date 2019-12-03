@@ -6,7 +6,7 @@ open System.Security.Claims
 open Microsoft.AspNetCore.Mvc
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Common
-open RealWorldFSharp.QueryModels
+open RealWorldFSharp.Api.QueryModels
 
 module Http =
     

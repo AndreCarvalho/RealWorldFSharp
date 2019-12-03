@@ -3,8 +3,8 @@ namespace RealWorldFSharp.Api.Workflows
 open Microsoft.Extensions.Options
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
-open RealWorldFSharp.QueryModels
-open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.QueryModels
+open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors

@@ -6,7 +6,7 @@ open Microsoft.AspNetCore.Authorization
 open RealWorldFSharp.Api
 open RealWorldFSharp.Api.Http
 open RealWorldFSharp.Api.Workflows
-open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.CommandModels
 
 [<Authorize>]
 [<ApiController>]

@@ -20,7 +20,7 @@ module CommandRepository =
     type AddArticle = ArticleEntity -> IoResult<unit>
     type UpdateArticle = ArticleEntity -> IoResult<unit>
     type DeleteArticle = ArticleEntity -> IoResult<unit>
-    type AddComment = CommentEntity -> IoResult<unit>
+    type AddComment = ArticleCommentsEntity -> IoResult<unit>
     
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (applicationUser, password) ->
@@ -126,7 +126,7 @@ module CommandRepository =
     let addComment (dbContext: ApplicationDbContext) : AddComment =
         fun commentEntity ->
             async {
-                do (dbContext.Comments.AddAsync commentEntity) |> ignore
+                do (dbContext.ArticleComments.AddAsync commentEntity) |> ignore
                 return Ok ()
                 // TODO: handle ex?
             }

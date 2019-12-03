@@ -7,8 +7,6 @@
     <ItemGroup>
         <Compile Include="UsersDomain.fs" />
         <Compile Include="ArticlesDomain.fs" />
-        <Compile Include="CommandModels.fs" />
-        <Compile Include="QueryModels.fs" />
     </ItemGroup>
     
     <ItemGroup>

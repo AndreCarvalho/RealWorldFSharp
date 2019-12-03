@@ -3,7 +3,7 @@
 open Microsoft.AspNetCore.Mvc
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Api
-open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api.Workflows
 
 [<ApiController>]

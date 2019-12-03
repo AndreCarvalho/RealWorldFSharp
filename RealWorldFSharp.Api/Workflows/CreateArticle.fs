@@ -6,7 +6,8 @@ open Microsoft.AspNetCore.Identity
 open RealWorldFSharp
 open RealWorldFSharp.Articles
 open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.CommandModels
+open RealWorldFSharp.Api.CommandModels
+open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
 open RealWorldFSharp.Domain
