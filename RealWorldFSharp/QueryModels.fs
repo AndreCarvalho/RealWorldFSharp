@@ -72,6 +72,10 @@ module QueryModels =
         Comment: CommentModel
     }
     
+    type MultipleCommentsModelEnvelope = {
+        Comments: CommentModel array
+    }
+    
     let toUserModelEnvelope token (userInfo: UserInfo) =
         {
             User = {
@@ -124,14 +128,23 @@ module QueryModels =
         {
             Article = toArticleModel profileModel article
         }
-        
+    
+    let toCommentModel profileModel (comment: Comment) = 
+        {
+            Id = comment.Id.ToString()
+            CreatedAt = comment.CreatedAt
+            UpdatedAt = comment.UpdatedAt
+            Body = comment.Body.Value
+            Author = profileModel
+        }
     let toCommentModelEnvelope profileModel (comment: Comment) =
         {
-            Comment = {
-                Id = comment.Id.ToString()
-                CreatedAt = comment.CreatedAt
-                UpdatedAt = comment.UpdatedAt
-                Body = comment.Body.Value
-                Author = profileModel
-            }
+            Comment = toCommentModel profileModel comment
         }
+        
+    let toCommentsModelEnvelope commentAndProfilePairs =
+        let commentsModel = commentAndProfilePairs |> List.map (fun (c, p) -> toCommentModel p c) |> Array.ofList 
+        {
+            Comments = commentsModel
+        }
+        

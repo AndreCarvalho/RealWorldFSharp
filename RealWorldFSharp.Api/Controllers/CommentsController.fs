@@ -12,7 +12,8 @@ open RealWorldFSharp.CommandModels
 [<ApiController>]
 [<Route("api/articles/{articleSlug}/comments")>]
 type CommentsController (
-                            addCommentWorkflow: AddCommentWorkflow
+                            addCommentWorkflow: AddCommentWorkflow,
+                            getCommentsWorkflow: GetCommentsWorkflow
                         ) =
     inherit Controller()
     
@@ -23,5 +24,17 @@ type CommentsController (
         
         async {
             let! result = addCommentWorkflow.Execute(userId, articleSlug, commandModelEnvelope.Comment)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+        
+        
+    [<HttpGet>]
+    [<AllowAnonymous>]
+    [<Route("")>]
+    member self.GetComments(articleSlug: string) =
+        let userIdOption = base.HttpContext |> Http.getUserIdOption
+        
+        async {
+            let! result = getCommentsWorkflow.Execute(userIdOption, articleSlug)
             return result |> resultToActionResult self
         } |> Async.StartAsTask

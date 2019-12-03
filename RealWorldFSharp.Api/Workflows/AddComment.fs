@@ -23,16 +23,14 @@ type AddCommentWorkflow (
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! authorUserOption = DataPipeline.getUserInfoById userManager article.AuthorUserId
-            let! (authorUserInfo, _) = noneToUserNotFoundError authorUserOption article.AuthorUserId.Value |> expectUsersError
+            let! userOption = DataPipeline.getUserInfoById userManager userId
+            let! (userInfo, _) = noneToUserNotFoundError userOption article.AuthorUserId.Value |> expectUsersError
             
             let! cmd = validateAddCommentToArticleCommand command |> expectValidationError
             let comment = createComment cmd.Body article userId DateTimeOffset.UtcNow
             
-            let! userFollowing = userId |> Helper.getUserFollowing dbContext userManager
-            
             do! comment |> DataPipeline.addComment dbContext |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            return comment |> QueryModels.toCommentModelEnvelope (authorUserInfo |> QueryModels.toProfileModel userFollowing)
+            return comment |> QueryModels.toCommentModelEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
         }

@@ -74,3 +74,24 @@ module EntityToDomainMapping =
         
     let mapArticle article =
         validateArticle article |> valueOrException
+        
+    let validateComment (commentEntity:CommentEntity) =
+        result {
+            let id = commentEntity.Id |> Guid.Parse
+            let! body = CommentBody.create "body" commentEntity.Body
+            let articleId = commentEntity.ArticleId |> Guid.Parse
+            let! authorUserId = UserId.create "userid" commentEntity.UserId
+            let createdAt = commentEntity.CreatedAt
+            let updatedAt = commentEntity.UpdatedAt
+            
+            return {
+                Id = id
+                Body = body
+                ArticleId = articleId
+                AuthorUserId = authorUserId
+                CreatedAt = createdAt
+                UpdatedAt = updatedAt
+            }
+        }
+        
+    let mapCommentEntity entity = entity |> validateComment |> valueOrException
