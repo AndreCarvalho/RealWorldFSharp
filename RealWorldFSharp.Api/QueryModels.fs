@@ -5,6 +5,7 @@ open System.Collections.Generic
 open RealWorldFSharp.Domain
 open RealWorldFSharp.Articles.Domain
 open RealWorldFSharp.Common
+open RealWorldFSharp.Data.ReadModels
 
 module QueryModels =
     
@@ -142,9 +143,36 @@ module QueryModels =
             Comment = toCommentModel profileModel comment
         }
         
-    let toCommentsModelEnvelope commentAndProfilePairs =
-        let commentsModel = commentAndProfilePairs |> List.map (fun (c, p) -> toCommentModel p c) |> Array.ofList 
+//    let toCommentsModelEnvelope commentAndProfilePairs =
+//        let commentsModel = commentAndProfilePairs |> List.map (fun (c, p) -> toCommentModel p c) |> Array.ofList 
+//        {
+//            Comments = commentsModel
+//        }
+        
+    let toCommentsModelEnvelope (userFollowing:UserFollowing option) (commentEntities: seq<ArticleCommentEntity>) =
         {
-            Comments = commentsModel
+            Comments = commentEntities
+                       |> Seq.map (fun c -> {
+                           Id = c.Id
+                           Body = c.Body
+                           CreatedAt = c.CreatedAt
+                           UpdatedAt = c.UpdatedAt
+                           Author = {
+                               Username = c.User.Username
+                               Bio = c.User.Bio
+                               Image = c.User.ImageUrl
+                               Following =
+                                   match userFollowing with
+                                   | Some uf ->
+                                       let authorUserId = c.UserId |> (UserId.create "userId") |> Errors.valueOrException
+                                       if uf.Id = authorUserId then
+                                           Nullable.empty
+                                        else                                           
+                                            uf.Following.Contains authorUserId |> Nullable.from
+                                   | None ->
+                                       Nullable.empty
+                           }
+                       })
+                       |> Array.ofSeq
         }
         

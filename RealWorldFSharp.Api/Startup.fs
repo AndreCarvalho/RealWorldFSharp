@@ -37,7 +37,10 @@ type Startup private () =
             )
             .AddEntityFrameworkStores<ApplicationDbContext>() |> ignore
             
-        services.AddControllers() |> ignore
+        services
+            .AddControllers()
+            .AddJsonOptions(fun opt -> opt.JsonSerializerOptions.IgnoreNullValues <- true) |> ignore
+        
         
         services.AddTransient<RegisterNewUserWorkflow>() |> ignore
         services.AddTransient<AuthenticateUserWorkflow>() |> ignore

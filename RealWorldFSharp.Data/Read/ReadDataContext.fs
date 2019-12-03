@@ -30,6 +30,7 @@ module ReadModels =
         member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
         member val User: UserEntity = null with get, set
 
+    // A DataContext optimized for queries/reading 
     type ReadDataContext(options:DbContextOptions<ReadDataContext>) =
         inherit DbContext(options)
         
@@ -37,7 +38,6 @@ module ReadModels =
         
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
-            //modelBuilder.Entity<ArticleCommentEntity>().HasOne<UserEntity>() |> ignore
         
         override x.SaveChangesAsync(_: bool, _: CancellationToken) =
             //Prevent writing with this context
