@@ -23,7 +23,8 @@ type Startup private () =
 
     // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services: IServiceCollection) =
-        services.AddDbContext<ApplicationDbContext>(fun opt -> opt.UseInMemoryDatabase("InMemoryDb") |> ignore) |> ignore
+        let connectionString = this.Configuration.GetValue<string>("ConnectionString")
+        services.AddDbContext<ApplicationDbContext>(fun opt -> opt.UseSqlServer(connectionString) |> ignore) |> ignore
         
         services.AddIdentity<ApplicationUser, IdentityRole>(fun opt ->
                 opt.User.RequireUniqueEmail <- true 
@@ -33,7 +34,7 @@ type Startup private () =
                 opt.Password.RequireLowercase <- false
             )
             .AddEntityFrameworkStores<ApplicationDbContext>() |> ignore
-        
+            
         services.AddControllers() |> ignore
         
         services.AddTransient<RegisterNewUserWorkflow>() |> ignore
@@ -50,10 +51,10 @@ type Startup private () =
         services.AddTransient<AddCommentWorkflow>() |> ignore
         services.AddTransient<GetCommentsWorkflow>() |> ignore
         
-        let appSettingsSection = this.Configuration.GetSection "JwtConfiguration"
-        services.Configure<JwtConfiguration> appSettingsSection |> ignore
+        let jwtSection = this.Configuration.GetSection "JwtConfiguration"
+        services.Configure<JwtConfiguration> jwtSection |> ignore
         
-        let jwtConfiguration = appSettingsSection.Get<JwtConfiguration>()
+        let jwtConfiguration = jwtSection.Get<JwtConfiguration>()
         let key = Encoding.ASCII.GetBytes jwtConfiguration.Secret
         let signinKey = new SymmetricSecurityKey(key)
         
@@ -105,5 +106,9 @@ type Startup private () =
         app.UseEndpoints(fun endpoints -> 
             endpoints.MapControllers() |> ignore
             ) |> ignore
+        
+        use serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope()
+        use dbContext = serviceScope.ServiceProvider.GetService<ApplicationDbContext>()
+        dbContext.Database.EnsureCreated() |> ignore
 
     member val Configuration : IConfiguration = null with get, set
