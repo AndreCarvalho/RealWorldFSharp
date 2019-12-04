@@ -29,12 +29,20 @@ module ReadModels =
         member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
         member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
         member val User: UserEntity = null with get, set
+        
+    [<Table("ArticleTags")>]
+    type ArticleTagEntity() =
+        [<Key>]
+        member val Id: int = -1 with get, set
+        member val Tag: string = null with get, set
+        
 
     // A DataContext optimized for queries/reading 
     type ReadDataContext(options:DbContextOptions<ReadDataContext>) =
         inherit DbContext(options)
         
         [<DefaultValue>] val mutable articleComments: DbSet<ArticleCommentEntity>
+        [<DefaultValue>] val mutable articleTags: DbSet<ArticleTagEntity>
         
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
@@ -50,4 +58,8 @@ module ReadModels =
         member x.ArticleComments
             with get() = x.articleComments
             and set v = x.articleComments <- v
+            
+        member x.ArticleTags
+            with get() = x.articleTags
+            and set v = x.articleTags <- v
 

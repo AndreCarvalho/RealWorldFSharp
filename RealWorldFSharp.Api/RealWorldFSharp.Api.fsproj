@@ -25,12 +25,14 @@
         <Compile Include="Workflows\AddComment.fs" />
         <Compile Include="Workflows\GetComments.fs" />
         <Compile Include="Workflows\DeleteComment.fs" />
+        <Compile Include="Workflows\GetTags.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />
         <Compile Include="Controllers\ProfilesController.fs" />
         <Compile Include="Controllers\ArticlesController.fs" />
         <Compile Include="Controllers\CommentsController.fs" />
+        <Compile Include="Controllers\TagsController.fs" />
         <Folder Include="Middleware" />
         <Compile Include="Startup.fs" />
         <Compile Include="Program.fs" />

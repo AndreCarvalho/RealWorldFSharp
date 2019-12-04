@@ -6,6 +6,7 @@ open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
 open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Domain.Articles
 
 module QueryModels =
     
@@ -67,6 +68,10 @@ module QueryModels =
         CreatedAt: DateTimeOffset
         UpdatedAt: DateTimeOffset
         Author: ProfileModel
+    }
+    
+    type TagsModelEnvelope = {
+        Tags: string array
     }
     
     type SingleCommentModelEnvelope = {
@@ -176,3 +181,7 @@ module QueryModels =
                        |> Array.ofSeq
         }
         
+    let toTagsModelEnvelope tags =
+        {
+            Tags = tags |> Array.ofSeq
+        }

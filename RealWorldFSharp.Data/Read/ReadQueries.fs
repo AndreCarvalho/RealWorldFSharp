@@ -14,4 +14,15 @@ module ReadQueries =
                 }
             return query
         }
+        
+    let getTags (dbContext: ReadDataContext) =
+        async {
+            let query =
+                query {
+                    for tag in dbContext.ArticleTags do
+                    select tag.Tag
+                    distinct
+                }
+            return query
+        }
 
