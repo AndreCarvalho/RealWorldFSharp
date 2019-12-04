@@ -6,6 +6,7 @@ open DataEntities
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common.Errors
+open RealWorldFSharp.Domain.Articles
 
 module EntityToDomainMapping =
         
@@ -28,7 +29,7 @@ module EntityToDomainMapping =
     let mapApplicationUserToUserInfo applicationUser =
         validateApplicationUser applicationUser |> valueOrException
         
-    let mapUserFollowing (userFollowing:UserFollowingEntity) : UserFollowing =
+    let mapUserFollowing (userFollowing:UserFollowingsEntity) : UserFollowing =
         let userId = UserId.create "userid" userFollowing.Id |> valueOrException
         let following =
             userFollowing.Following
@@ -95,3 +96,14 @@ module EntityToDomainMapping =
         }
         
     let mapCommentEntity entity = entity |> validateComment |> valueOrException
+        
+    let mapFavoriteArticles (entity:FavoriteArticlesEntity) : FavoriteArticles =
+        let userId = UserId.create "userid" entity.UserId |> valueOrException
+        let favorites =
+            entity.Favorites
+            |> List.map Guid.Parse
+            |> Set.ofList
+        {
+            Id = userId
+            Favorites = favorites
+        }

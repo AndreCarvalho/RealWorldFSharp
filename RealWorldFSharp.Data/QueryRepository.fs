@@ -11,9 +11,10 @@ module QueryRepository =
 
     type GetApplicationUserByUsername = UserManager<ApplicationUser> -> Username -> IoQueryResult<ApplicationUser>
     type GetApplicationUserById = UserManager<ApplicationUser> -> UserId -> IoQueryResult<ApplicationUser>
-    type GetUserFollowing = ApplicationDbContext -> UserId -> IoResult<UserFollowingEntity>
+    type GetUserFollowing = ApplicationDbContext -> UserId -> IoResult<UserFollowingsEntity>
     type GetArticle = ApplicationDbContext -> Slug -> IoQueryResult<ArticleEntity>
     type GetComment = ApplicationDbContext -> CommentId -> IoQueryResult<ArticleCommentEntity>
+    type GetFavoriteArticles = ApplicationDbContext -> UserId -> IoResult<FavoriteArticlesEntity>
 
     let getApplicationUserByUsername : GetApplicationUserByUsername =
         fun userManager username ->
@@ -73,4 +74,25 @@ module QueryRepository =
                 }
                 
                 return Option.ofObj articleQuery
+            }
+            
+            
+    let getFavoriteArticles : GetFavoriteArticles =
+        fun dbContext userId ->
+            async {
+                try
+                    let query = query {
+                        for f in dbContext.FavoriteArticles.AsNoTracking() do
+                        where (f.UserId = userId)
+                        select f
+                    }
+                    
+                    let favoriteArticles = {
+                        UserId = userId
+                        Favorites = query |> Seq.map (fun x -> x.ArticleId) |> List.ofSeq
+                    }
+                    
+                    return Ok favoriteArticles
+                with
+                | ex -> return GenericError ex |> Error //TODO: let it crash?
             }

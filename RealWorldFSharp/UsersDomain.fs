@@ -60,14 +60,13 @@ module Users =
     }
     
     type AddUserResult = Added | AlreadyPresent
-    
+    type RemoveUserResult = Removed | NotPresent
+
     let addToUserFollowing candidateUserId userFollowing =
         if not <| userFollowing.Following.Contains candidateUserId then
             ({ userFollowing with Following = userFollowing.Following.Add candidateUserId }, Added)
         else
             (userFollowing, AlreadyPresent)
-            
-    type RemoveUserResult = Removed | NotPresent
     
     let removeFromUserFollowing userId userFollowing =
         if userFollowing.Following.Contains userId then

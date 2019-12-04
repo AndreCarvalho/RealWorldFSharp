@@ -1,36 +1,37 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open System
+open RealWorldFSharp.Data
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open RealWorldFSharp.Domain.Articles
-open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Domain.Users
+open RealWorldFSharp.Domain.Articles
 
-type UpdateArticleWorkflow (
+type UnfavoriteArticleWorkflow(
                                dbContext: ApplicationDbContext,
                                userManager: UserManager<ApplicationUser>
-                           ) =
-    member __.Execute(articleSlug, command: UpdateArticleCommandModel) =
+                            ) =
+    member __.Execute(currentUserId, articleSlug) =
         asyncResult {
-            // TODO: validate user can update
-            
+            let userId = currentUserId |> (UserId.create "userId") |> valueOrException
+
             let slug = Slug.create articleSlug
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! cmd = validateUpdateArticleCommand command |> expectValidationError
-            let now = DateTimeOffset.UtcNow
-            let article = article |> updateArticle cmd.Title cmd.Body cmd.Description now
+            let! favoriteArticles = DataPipeline.getFavoriteArticles dbContext userId |> expectDataRelatedErrorAsync
+            let result = favoriteArticles |> removeFromFavorites article.Id
             
-            do! DataPipeline.updateArticle dbContext article |> expectDataRelatedErrorAsync
-            do! dbContext.SaveChangesAsync()
+            if result = Remove then
+                do! DataPipeline.removeFavoriteArticle dbContext (userId, article.Id) |> expectDataRelatedErrorAsync
+                do! dbContext.SaveChangesAsync()
             
             let! userInfoOption = DataPipeline.getUserInfoById userManager article.AuthorUserId 
             let! (userInfo, _) = noneToError userInfoOption article.AuthorUserId.Value |> expectDataRelatedError
+            
+            // TODO: return read model version
             
             return article |> QueryModels.toSingleArticleEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
         }

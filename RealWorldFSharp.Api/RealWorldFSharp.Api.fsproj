@@ -26,6 +26,8 @@
         <Compile Include="Workflows\GetComments.fs" />
         <Compile Include="Workflows\DeleteComment.fs" />
         <Compile Include="Workflows\GetTags.fs" />
+        <Compile Include="Workflows\FavoriteArticle.fs" />
+        <Compile Include="Workflows\UnfavoriteArticle.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />
@@ -33,6 +35,7 @@
         <Compile Include="Controllers\ArticlesController.fs" />
         <Compile Include="Controllers\CommentsController.fs" />
         <Compile Include="Controllers\TagsController.fs" />
+        <Compile Include="Controllers\FavoriteArticlesController.fs" />
         <Folder Include="Middleware" />
         <Compile Include="Startup.fs" />
         <Compile Include="Program.fs" />

@@ -93,6 +93,22 @@ module Articles =
         CreatedAt: DateTimeOffset
         UpdatedAt: DateTimeOffset
     }
+    
+    type FavoriteArticles = {
+        Id: UserId
+        Favorites: Set<ArticleId>
+    }
+    
+    type AddFavoriteResult = Add | AlreadyPresent
+    type RemoveFavoriteResult = Remove | NotPresent
+    
+    let addToFavorites articleId favoriteArticles =
+        if not <| favoriteArticles.Favorites.Contains articleId then Add
+        else AlreadyPresent           
+    
+    let removeFromFavorites articleId favoriteArticles =
+        if favoriteArticles.Favorites.Contains articleId then Remove
+        else NotPresent
             
     let simpleCreateSlug  (dateTime:DateTimeOffset) (title: Title) =
         let title = title.Value

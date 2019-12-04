@@ -15,14 +15,16 @@ module CommandRepository =
     // TODO: this needs old and new password to work
     type UpdateUserPassword = (ApplicationUser * Password) -> UserIdentityResult<ApplicationUser>
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<ApplicationUser>
-    type AddUserFollowing = UserFollowing -> IoResult<unit>
-    type RemoveUserFollowing = UserFollowing -> IoResult<unit>
+    type AddUserFollowing = UserFollowingEntity -> IoResult<unit>
+    type RemoveUserFollowing = UserFollowingEntity -> IoResult<unit>
     type AddArticle = ArticleEntity -> IoResult<unit>
     type UpdateArticle = ArticleEntity -> IoResult<unit>
     type DeleteArticle = ArticleEntity -> IoResult<unit>
     type AddComment = ArticleCommentEntity -> IoResult<unit>
     type DeleteComment = ArticleCommentEntity -> IoResult<unit>
-    
+    type AddFavoriteArticle = FavoriteArticleEntity -> IoResult<unit>
+    type RemoveFavoriteArticle = FavoriteArticleEntity -> IoResult<unit>
+
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (applicationUser, password) ->
             async {
@@ -140,3 +142,18 @@ module CommandRepository =
                 // TODO: handle ex?
             }
             
+    let addFavoriteArticle (dbContext: ApplicationDbContext) : AddFavoriteArticle =
+        fun favoriteArticle ->
+            async {
+                let! _ = (dbContext.FavoriteArticles.AddAsync favoriteArticle).AsTask() |> Async.AwaitTask
+                return Ok ()
+                // TODO: handle ex?
+            }
+            
+    let removeFavoriteArticle (dbContext: ApplicationDbContext) : AddFavoriteArticle =
+        fun favoriteArticle ->
+            async {
+                dbContext.FavoriteArticles.Remove favoriteArticle |> ignore
+                return Ok ()
+                // TODO: handle ex?
+            }
