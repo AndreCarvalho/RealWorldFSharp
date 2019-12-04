@@ -5,6 +5,9 @@ open System.Collections.Generic
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
+open RealWorldFSharp.Common
+open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.ReadModels
 open RealWorldFSharp.Data.ReadModels
 open RealWorldFSharp.Domain.Articles
 
@@ -133,6 +136,34 @@ module QueryModels =
     let toSingleArticleEnvelope profileModel article =
         {
             Article = toArticleModel profileModel article
+        }
+        
+        
+    let toProfileModelReadModel (userEntity: UserEntity) =
+        {
+            Username = userEntity.Username
+            Bio = userEntity.Bio
+            Image = userEntity.ImageUrl
+            Following = Nullable.from false // todo
+        }
+        
+    let toArticleModelReadModel (article: ArticleEntity, favoriteCount) =
+        {
+            Slug = article.Slug
+            Title = article.Title
+            Description = article.Description
+            Body = article.Body
+            TagList = article.Tags |> Seq.map (fun x -> x.Tag) |> Array.ofSeq
+            CreatedAt = article.CreatedAt
+            UpdatedAt = article.UpdatedAt
+            Favorited = false //TODO
+            FavoritesCount = favoriteCount
+            Author = toProfileModelReadModel article.User
+        }
+        
+    let toSingleArticleEnvelopeReadModel (article, favoriteCount) =
+        {
+            Article = toArticleModelReadModel (article, favoriteCount)
         }
     
     let toCommentModel profileModel (comment: Comment) = 

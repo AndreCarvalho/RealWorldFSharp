@@ -3,5 +3,6 @@
     - feed articles
 
 - Improve
+    - use read model for article responses
     - update article does not account for user
     - foreign keys

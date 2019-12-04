@@ -22,10 +22,10 @@ type ArticlesController (
     [<HttpPost>]
     [<Route("")>]
     member self.CreateArticle(createArticle: CreateArticleCommandModelEnvelope) =
-        let username = base.HttpContext |> Http.getUserName
+        let userId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = createArticleWorkflow.Execute(username, createArticle.Article)
+            let! result = createArticleWorkflow.Execute(userId, createArticle.Article)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         

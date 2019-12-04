@@ -22,7 +22,7 @@ type GetCommentsWorkflow (
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! comments = ReadQueries.getCommentsForArticle readDataContext (article.Id.ToString())
+            let! comments = ReadModelQueries.getCommentsForArticle readDataContext (article.Id.ToString())
             
             return!
                 match userIdOption with

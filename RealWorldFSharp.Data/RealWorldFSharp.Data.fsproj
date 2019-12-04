@@ -12,7 +12,7 @@
         <Compile Include="QueryRepository.fs" />
         <Compile Include="DataPipeline.fs" />
         <Compile Include="Read\ReadDataContext.fs" />
-        <Compile Include="Read\ReadQueries.fs" />
+        <Compile Include="Read\ReadModelQueries.fs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -23,7 +23,7 @@
     <ItemGroup>
       <PackageReference Include="FsToolkit.ErrorHandling" Version="1.2.5" />
       <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.0.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.0" />
     </ItemGroup>
 
 </Project>

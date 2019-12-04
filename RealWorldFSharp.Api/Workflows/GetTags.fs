@@ -7,6 +7,6 @@ open RealWorldFSharp.Data.ReadModels
 type GetTagsWorkflow (readDataContext: ReadDataContext) =
     member __.Execute() =
         async {
-            let! tags = ReadQueries.getTags readDataContext
+            let! tags = ReadModelQueries.getTags readDataContext
             return tags |> QueryModels.toTagsModelEnvelope
         }
