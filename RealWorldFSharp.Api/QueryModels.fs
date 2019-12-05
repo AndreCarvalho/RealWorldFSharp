@@ -120,24 +120,25 @@ module QueryModels =
         let envelope = toSimpleProfileModelEnvelope userInfo
         { envelope with Profile = userInfo |> toProfileModel userFollowing }
 
-    let toArticleModel (profileModel: ProfileModel) (article: Article) =
-        {
-            Slug = article.Slug.Value
-            Title = article.Title.Value
-            Description = article.Description.Value
-            Body = article.Body.Value
-            TagList = article.Tags |> Array.ofList |> Array.map (fun x -> x.Value)
-            CreatedAt = article.CreatedAt
-            UpdatedAt = article.UpdatedAt
-            Favorited = false //TODO
-            FavoritesCount = 0 //TODO
-            Author = profileModel
-        }
-    let toSingleArticleEnvelope profileModel article =
-        {
-            Article = toArticleModel profileModel article
-        }
+//    let toArticleModel (profileModel: ProfileModel) (article: Article) =
+//        {
+//            Slug = article.Slug.Value
+//            Title = article.Title.Value
+//            Description = article.Description.Value
+//            Body = article.Body.Value
+//            TagList = article.Tags |> Array.ofList |> Array.map (fun x -> x.Value)
+//            CreatedAt = article.CreatedAt
+//            UpdatedAt = article.UpdatedAt
+//            Favorited = false //TODO
+//            FavoritesCount = 0 //TODO
+//            Author = profileModel
+//        }
         
+//    let toSingleArticleEnvelope profileModel article =
+//        {
+//            Article = toArticleModel profileModel article
+//        }
+//        
         
     let toProfileModelReadModel (userEntity: UserEntity) =
         {

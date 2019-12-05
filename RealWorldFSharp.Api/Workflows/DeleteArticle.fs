@@ -18,7 +18,7 @@ type DeleteArticleWorkflow (
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! article = validateDeleteArticle article userId |> expectOperationNotAllowedError
+            let! article = validateArticleOwner "delete article" article userId |> expectOperationNotAllowedError
             
             do! DataPipeline.deleteArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()

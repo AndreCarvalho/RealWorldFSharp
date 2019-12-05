@@ -8,10 +8,13 @@ open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Read
+open RealWorldFSharp.Data.ReadModels
 
 type GetArticleWorkflow (
                            dbContext: ApplicationDbContext,
-                           userManager: UserManager<ApplicationUser>
+                           userManager: UserManager<ApplicationUser>,
+                           readDataContext: ReadDataContext
                         ) =
     member __.Execute(userIdOption, articleSlug) =           
         asyncResult {
@@ -22,6 +25,7 @@ type GetArticleWorkflow (
             let! authorUserInfoOption = DataPipeline.getUserInfoById userManager article.AuthorUserId 
             let! (authorUserInfo, _) = noneToError authorUserInfoOption article.AuthorUserId.Value |> expectDataRelatedError
 
+            // TODO: fill following property
             let! profileModel =
                 match userIdOption with
                 | Some userId ->
@@ -33,5 +37,6 @@ type GetArticleWorkflow (
                 | None ->
                     authorUserInfo |> QueryModels.toSimpleProfileModel |> AsyncResult.retn
             
-            return article |> QueryModels.toSingleArticleEnvelope profileModel
+            let! articleReadModel = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
+            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel
         }

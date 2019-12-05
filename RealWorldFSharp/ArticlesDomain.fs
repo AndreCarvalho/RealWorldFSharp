@@ -140,11 +140,11 @@ module Articles =
         }
         
         
-    let validateDeleteArticle (article:Article) userId =
+    let validateArticleOwner operation (article:Article) userId =
         if article.AuthorUserId = userId then
             Ok article
         else
-            operationNotAllowed "Delete article" "Not article author"
+            operationNotAllowed operation "Not article author"
             
     let createComment commentBody (article:Article) userId dateTime =
         {

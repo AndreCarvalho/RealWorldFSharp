@@ -32,10 +32,10 @@ type ArticlesController (
     [<HttpPut>]
     [<Route("{articleSlug}")>]
     member self.UpdateArticle(articleSlug: string, updateArticle: UpdateArticleCommandModelEnvelope) =
-        let username = base.HttpContext |> Http.getUserName
+        let currentUserId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = updateArticleWorkflow.Execute(articleSlug, updateArticle.Article)
+            let! result = updateArticleWorkflow.Execute(currentUserId, articleSlug, updateArticle.Article)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         

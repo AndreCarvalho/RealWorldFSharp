@@ -2,25 +2,29 @@ namespace RealWorldFSharp.Api.Workflows
 
 open System
 open FsToolkit.ErrorHandling
-open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Data.DataEntities
 open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Read
+open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Domain.Users
 
 type UpdateArticleWorkflow (
                                dbContext: ApplicationDbContext,
-                               userManager: UserManager<ApplicationUser>
+                               readDataContext: ReadDataContext
                            ) =
-    member __.Execute(articleSlug, command: UpdateArticleCommandModel) =
+    member __.Execute(userId, articleSlug, command: UpdateArticleCommandModel) =
         asyncResult {
-            // TODO: validate user can update
+            let userId = UserId.create "userId" userId |> valueOrException
             
             let slug = Slug.create articleSlug
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
+            
+            let! article = validateArticleOwner "update article" article userId |> expectOperationNotAllowedError
             
             let! cmd = validateUpdateArticleCommand command |> expectValidationError
             let now = DateTimeOffset.UtcNow
@@ -29,8 +33,6 @@ type UpdateArticleWorkflow (
             do! DataPipeline.updateArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            let! userInfoOption = DataPipeline.getUserInfoById userManager article.AuthorUserId 
-            let! (userInfo, _) = noneToError userInfoOption article.AuthorUserId.Value |> expectDataRelatedError
-            
-            return article |> QueryModels.toSingleArticleEnvelope (userInfo |> QueryModels.toSimpleProfileModel)
+            let! articleReadModel = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
+            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel
         }
