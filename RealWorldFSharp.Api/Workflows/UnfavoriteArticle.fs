@@ -29,6 +29,6 @@ type UnfavoriteArticleWorkflow(
                 do! DataPipeline.removeFavoriteArticle dbContext (userId, article.Id) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
             
-            let! articleReadModel = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel
+            let! (articleReadModel, favoriteCount) = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
+            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel favoriteCount false
         }

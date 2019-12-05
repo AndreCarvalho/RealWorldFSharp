@@ -5,11 +5,7 @@ open System.Collections.Generic
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
-open RealWorldFSharp.Common
 open RealWorldFSharp.Data.ReadModels
-open RealWorldFSharp.Data.ReadModels
-open RealWorldFSharp.Data.ReadModels
-open RealWorldFSharp.Domain.Articles
 
 module QueryModels =
     
@@ -37,7 +33,7 @@ module QueryModels =
         Username: string
         Bio: string
         Image: string
-        Following: Nullable<bool>
+        Following: bool
     }
     
     [<CLIMutable>]
@@ -101,13 +97,13 @@ module QueryModels =
             Username = userInfo.Username.Value
             Bio = userInfo.Bio |> Option.defaultValue null
             Image = userInfo.Image |> Option.defaultValue null
-            Following = Nullable.empty<bool> 
+            Following = false
         }
         
     let toProfileModel (userFollowing: UserFollowing) (userInfo: UserInfo) =
         let model = toSimpleProfileModel userInfo
         if userFollowing.Id <> userInfo.Id then
-            { model with Following = userFollowing.Following.Contains userInfo.Id |> Nullable.from }
+            { model with Following = userFollowing.Following.Contains userInfo.Id }
         else
             model
         
@@ -145,10 +141,10 @@ module QueryModels =
             Username = userEntity.Username
             Bio = userEntity.Bio
             Image = userEntity.ImageUrl
-            Following = Nullable.from false // todo
+            Following = false // todo
         }
         
-    let toArticleModelReadModel (article: ArticleEntity, favoriteCount) =
+    let toArticleModelReadModel favoriteCount isFavorite (article: ArticleEntity)  =
         {
             Slug = article.Slug
             Title = article.Title
@@ -157,14 +153,14 @@ module QueryModels =
             TagList = article.Tags |> Seq.map (fun x -> x.Tag) |> Array.ofSeq
             CreatedAt = article.CreatedAt
             UpdatedAt = article.UpdatedAt
-            Favorited = false //TODO
+            Favorited = isFavorite
             FavoritesCount = favoriteCount
             Author = toProfileModelReadModel article.User
         }
         
-    let toSingleArticleEnvelopeReadModel (article, favoriteCount) =
+    let toSingleArticleEnvelopeReadModel favoriteCount isFavorite article  =
         {
-            Article = toArticleModelReadModel (article, favoriteCount)
+            Article = toArticleModelReadModel favoriteCount isFavorite article 
         }
     
     let toCommentModel profileModel (comment: Comment) = 
@@ -201,13 +197,9 @@ module QueryModels =
                                Following =
                                    match userFollowing with
                                    | Some uf ->
-                                       let authorUserId = c.UserId |> (UserId.create "userId") |> Errors.valueOrException
-                                       if uf.Id = authorUserId then
-                                           Nullable.empty
-                                        else                                           
-                                            uf.Following.Contains authorUserId |> Nullable.from
-                                   | None ->
-                                       Nullable.empty
+                                        let authorUserId = c.UserId |> (UserId.create "userId") |> Errors.valueOrException                                       
+                                        uf.Following.Contains authorUserId
+                                   | None -> false
                            }
                        })
                        |> Array.ofSeq

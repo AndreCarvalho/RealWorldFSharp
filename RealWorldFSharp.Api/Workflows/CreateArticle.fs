@@ -28,6 +28,6 @@ type CreateArticleWorkflow (
             do! DataPipeline.addArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            let! articleReadModel = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel
+            let! (articleReadModel, favoriteCount) = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
+            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel favoriteCount false
         }

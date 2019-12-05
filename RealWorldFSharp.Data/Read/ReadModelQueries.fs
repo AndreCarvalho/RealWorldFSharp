@@ -34,3 +34,21 @@ module ReadModelQueries =
                     exactlyOneOrDefault
                 }
             }
+            
+    let getArticleWithFavorite (dbContext: ReadDataContext) =
+        fun userId articleId ->
+            async {
+                return query {
+                    for article in dbContext.Articles.Include("User").Include("Tags") do
+                    where (article.Id = articleId)
+                    let favoriteCount = article.Favorited.Count
+                    let isFavoriteQuery =
+                        query {
+                            for favorite in article.Favorited do
+                            where (favorite.UserId = userId)
+                            count
+                        }
+                    select (article, favoriteCount, isFavoriteQuery = 1)
+                    exactlyOneOrDefault
+                }
+            }

@@ -3,5 +3,4 @@
     - feed articles
 
 - Improve
-    - use read model for article responses
     - foreign keys
