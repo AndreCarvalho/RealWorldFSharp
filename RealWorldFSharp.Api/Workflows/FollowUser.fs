@@ -1,11 +1,11 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Domain.Users
 
 type FollowUserWorkflow(

@@ -1,4 +1,4 @@
-namespace RealWorldFSharp.Data
+namespace RealWorldFSharp.Data.Write
 
 open System
 open FsToolkit.ErrorHandling

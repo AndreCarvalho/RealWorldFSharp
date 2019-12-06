@@ -1,7 +1,8 @@
 namespace RealWorldFSharp.Data.Read
 
-open RealWorldFSharp.Data.ReadModels
 open Microsoft.EntityFrameworkCore
+
+open ReadModels
 
 module ReadModelQueries =
    

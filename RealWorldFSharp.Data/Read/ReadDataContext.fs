@@ -1,4 +1,4 @@
-namespace RealWorldFSharp.Data
+namespace RealWorldFSharp.Data.Read
 
 open System
 open System.ComponentModel.DataAnnotations
@@ -7,7 +7,6 @@ open System.Threading
 open System.Threading.Tasks
 open Microsoft.EntityFrameworkCore
 open System.Collections.Generic
-open System.ComponentModel.DataAnnotations.Schema
 
 module ReadModels =
     

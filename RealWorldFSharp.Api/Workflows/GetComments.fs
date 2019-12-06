@@ -3,11 +3,11 @@ namespace RealWorldFSharp.Api.Workflows
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Api
 open RealWorldFSharp.Domain.Articles
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.Read.ReadModels
 
 type GetCommentsWorkflow (
                                dbContext: ApplicationDbContext,

@@ -5,14 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="DataEntities.fs" />
-        <Compile Include="DomainToEntityMapping.fs" />
-        <Compile Include="EntityToDomainMapping.fs" />
-        <Compile Include="CommandRepository.fs" />
-        <Compile Include="QueryRepository.fs" />
-        <Compile Include="DataPipeline.fs" />
         <Compile Include="Read\ReadDataContext.fs" />
         <Compile Include="Read\ReadModelQueries.fs" />
+        <Compile Include="Write\DataEntities.fs" />
+        <Compile Include="Write\DomainToEntityMapping.fs" />
+        <Compile Include="Write\EntityToDomainMapping.fs" />
+        <Compile Include="Write\CommandRepository.fs" />
+        <Compile Include="Write\QueryRepository.fs" />
+        <Compile Include="Write\DataPipeline.fs" />
     </ItemGroup>
 
     <ItemGroup>

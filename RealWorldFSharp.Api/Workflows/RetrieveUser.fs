@@ -8,8 +8,8 @@ open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open FsToolkit.ErrorHandling
-open RealWorldFSharp.Data
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Domain.Users
 
 

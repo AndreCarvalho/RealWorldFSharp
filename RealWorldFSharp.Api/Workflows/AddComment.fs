@@ -6,10 +6,10 @@ open Microsoft.AspNetCore.Identity
 open RealWorldFSharp.Api
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 
 type AddCommentWorkflow (
                                dbContext: ApplicationDbContext,

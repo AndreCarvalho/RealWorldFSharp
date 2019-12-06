@@ -1,12 +1,12 @@
 namespace RealWorldFSharp.Api.Workflows
 
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.Read.ReadModels
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Domain.Articles
 

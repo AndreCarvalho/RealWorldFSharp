@@ -6,7 +6,7 @@ open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
 open RealWorldFSharp.Data.Read.ReadModelQueries
-open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.Read.ReadModels
 
 module QueryModels =
     
@@ -170,12 +170,7 @@ module QueryModels =
                            Body = comment.Body
                            CreatedAt = comment.CreatedAt
                            UpdatedAt = comment.UpdatedAt
-                           Author = {
-                               Username = comment.User.Username
-                               Bio = comment.User.Bio
-                               Image = comment.User.ImageUrl
-                               Following = isFollowing
-                           }
+                           Author = toProfileModelReadModel comment.User isFollowing
                        })
                        |> Array.ofSeq
         }

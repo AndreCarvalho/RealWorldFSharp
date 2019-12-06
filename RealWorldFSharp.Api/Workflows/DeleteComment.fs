@@ -4,9 +4,9 @@ open System
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 
 type DeleteCommentWorkflow (
                                dbContext: ApplicationDbContext

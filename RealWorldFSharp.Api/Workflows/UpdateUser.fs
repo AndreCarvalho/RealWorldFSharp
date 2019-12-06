@@ -10,8 +10,8 @@ open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Api.CommandModels
-open RealWorldFSharp.Data
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write
+open RealWorldFSharp.Data.Write.DataEntities
 
 type UpdateUserWorkflow (
                                 userManager: UserManager<ApplicationUser>,

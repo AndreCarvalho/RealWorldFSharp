@@ -9,9 +9,9 @@ open RealWorldFSharp.Api.CommandModels
 open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Api.Authentication
 open RealWorldFSharp.Api.Settings
-open RealWorldFSharp.Data
+open RealWorldFSharp.Data.Write
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write.DataEntities
 
 type RegisterNewUserWorkflow(
                                 userManager: UserManager<ApplicationUser>,

@@ -3,16 +3,14 @@ namespace RealWorldFSharp.Api.Workflows
 open Microsoft.AspNetCore.Identity
 open FsToolkit.ErrorHandling
 open RealWorldFSharp.Api
-open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data
-open RealWorldFSharp.Data.DataEntities
+open RealWorldFSharp.Data.Write
+open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.Read.ReadModels
 open RealWorldFSharp.Domain.Users
 
 type RetrieveProfileWorkflow(
-                                dbContext: ApplicationDbContext,
                                 userManager: UserManager<ApplicationUser>,
                                 readDataContext: ReadDataContext
                             ) =

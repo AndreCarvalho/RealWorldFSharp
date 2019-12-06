@@ -14,8 +14,8 @@ open Settings
 open RealWorldFSharp.Api.Workflows
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
-open RealWorldFSharp.Data.DataEntities
-open RealWorldFSharp.Data.ReadModels
+open RealWorldFSharp.Data.Write.DataEntities
+open RealWorldFSharp.Data.Read.ReadModels
 
 type Startup private () =
     new (configuration: IConfiguration) as this =
