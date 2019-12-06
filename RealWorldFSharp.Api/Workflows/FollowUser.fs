@@ -16,7 +16,7 @@ type FollowUserWorkflow(
         asyncResult {
             let! usernameToFollow = Username.create "username" userNameToFollow |> expectValidationError
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToFollow 
-            let! (userInfoToFollow, _) = noneToUserNotFoundError userInfoOption usernameToFollow.Value |> expectUsersError
+            let! userInfoToFollow = noneToUserNotFoundError userInfoOption usernameToFollow.Value |> expectUsersError
             
             let userId = currentUserId |> (UserId.create "userId") |> valueOrException
 

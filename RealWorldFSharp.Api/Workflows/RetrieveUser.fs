@@ -22,7 +22,7 @@ type RetrieveUserWorkflow (
         asyncResult {
             let! username = Username.create "username" username |> expectValidationError
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager username 
-            let! (userInfo, _) = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
+            let! userInfo = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
             let token = userInfo |> Authentication.createToken jwtOptions.Value
             return userInfo |> toUserModelEnvelope token
         }

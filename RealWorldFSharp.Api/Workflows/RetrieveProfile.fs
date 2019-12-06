@@ -16,7 +16,7 @@ type RetrieveProfileWorkflow(
         asyncResult {
             let! profileUsername = Username.create "username" profileUserName |> expectValidationError
             let! profileUserInfoOption = DataPipeline.getUserInfoByUsername userManager profileUsername 
-            let! (profileUserInfo, _) = noneToUserNotFoundError profileUserInfoOption profileUsername.Value |> expectUsersError
+            let! profileUserInfo = noneToUserNotFoundError profileUserInfoOption profileUsername.Value |> expectUsersError
             
             return!
                 match currentUserIdOption with

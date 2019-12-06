@@ -11,8 +11,9 @@ module DataPipeline =
     
     type RegisterNewUser = UserInfo * Password -> UserIdentityResult<unit>
     type AuthenticateUser = EmailAddress * Password -> UserIdentityResult<UserInfo>
-    type GetUserInfoByUsername = Username -> IoQueryResult<(UserInfo * ApplicationUser)>
-    type GetUserInfoById = UserId -> IoQueryResult<(UserInfo * ApplicationUser)>
+    type GetUserInfoByUserIdForUpdate = UserId -> IoQueryResult<(UserInfo * ApplicationUser)>
+    type GetUserInfoByUsername = Username -> IoQueryResult<UserInfo>
+    type GetUserInfoById = UserId -> IoQueryResult<UserInfo>
     type UpdateUserEmailAddress = (ApplicationUser * EmailAddress) -> UserIdentityResult<UserInfo>
     type UpdateUserUsername = (ApplicationUser * Username) -> UserIdentityResult<UserInfo>
     type UpdateUserInfo = ApplicationUser -> UserIdentityResult<unit>
@@ -52,6 +53,16 @@ module DataPipeline =
                 
                 return
                     applicationUser
+                    |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user))
+            }
+            
+    let getUserInfoByUserIdForUpdate (userManager: UserManager<ApplicationUser>) : GetUserInfoByUserIdForUpdate =
+        fun userId ->
+            async {
+                let! applicationUser = QueryRepository.getApplicationUserById userManager userId.Value
+                
+                return
+                    applicationUser
                     |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user, user))
             }
                 
@@ -62,7 +73,7 @@ module DataPipeline =
                 
                 return
                     applicationUser
-                    |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user, user))
+                    |> Option.map (fun user -> (EntityToDomainMapping.mapApplicationUserToUserInfo user))
             }
     
     let updateUserEmailAddress (userManager: UserManager<ApplicationUser>) : UpdateUserEmailAddress =

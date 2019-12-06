@@ -18,7 +18,7 @@ type UnfollowUserWorkflow(
             let! usernameToUnfollow = Username.create "username" userNameToUnfollow |> expectValidationError
 
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager usernameToUnfollow 
-            let! (userInfoToUnfollow, _) = noneToUserNotFoundError userInfoOption usernameToUnfollow.Value |> expectUsersError
+            let! userInfoToUnfollow = noneToUserNotFoundError userInfoOption usernameToUnfollow.Value |> expectUsersError
             
             let userId = currentUserId |> (UserId.create "userId") |> valueOrException
             

@@ -53,13 +53,13 @@ type UpdateUserWorkflow (
             return userInfo
         }
     
-    member __.Execute(username, commandModel: UpdateUserCommandModel) =
+    member __.Execute(userId, commandModel: UpdateUserCommandModel) =
         asyncResult {
             let! command = CommandModels.validateUpdateUserCommand commandModel |> expectValidationError
-            let! username = Username.create "username" username |> expectValidationError
+            let! userId = UserId.create "userId" userId |> expectValidationError
 
-            let! userInfoOption = DataPipeline.getUserInfoByUsername userManager username
-            let! (userInfo, applicationUser) = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
+            let! userInfoOption = DataPipeline.getUserInfoByUserIdForUpdate userManager userId
+            let! (userInfo, applicationUser) = noneToUserNotFoundError userInfoOption userId.Value |> expectUsersError
             
             let! userInfo = tryUpdateUsername command userInfo applicationUser |> expectUsersErrorAsync
             let! userInfo = tryUpdateEmailAddress command userInfo applicationUser |> expectUsersErrorAsync

@@ -31,9 +31,9 @@ type UserController(
     [<HttpPut>]
     [<Route("")>]
     member self.Put(updateUser: UpdateUserCommandModelEnvelope) =
-        let userName = base.HttpContext |> Http.getUserName
+        let userId = base.HttpContext |> Http.getUserId
                         
         async {
-            let! result = updateUserWorkflow.Execute(userName, updateUser.User)
+            let! result = updateUserWorkflow.Execute(userId, updateUser.User)
             return result |> resultToActionResult self
         } |> Async.StartAsTask

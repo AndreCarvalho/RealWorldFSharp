@@ -24,7 +24,7 @@ type AddCommentWorkflow (
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
             let! userOption = DataPipeline.getUserInfoById userManager userId
-            let! (userInfo, _) = noneToUserNotFoundError userOption article.AuthorUserId.Value |> expectUsersError
+            let! userInfo = noneToUserNotFoundError userOption article.AuthorUserId.Value |> expectUsersError
             
             let! cmd = validateAddCommentToArticleCommand command |> expectValidationError
             let comment = createComment cmd.Body article userId DateTimeOffset.UtcNow
