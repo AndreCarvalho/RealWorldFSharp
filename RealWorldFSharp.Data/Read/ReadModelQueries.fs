@@ -4,6 +4,14 @@ open RealWorldFSharp.Data.ReadModels
 open Microsoft.EntityFrameworkCore
 
 module ReadModelQueries =
+   
+    type ArticleQuery =
+        {
+            Article: ArticleEntity
+            FavoriteCount: int
+            IsFavorited: bool
+            IsFollowingAuthor: bool
+        }
     
     let getCommentsForArticle (dbContext: ReadDataContext) =
         fun userIdOption articleId ->
@@ -49,12 +57,17 @@ module ReadModelQueries =
                     for article in dbContext.Articles.Include("User").Include("Tags") do
                     where (article.Id = articleId)
                     let favoriteCount = article.Favorited.Count
-                    select (article, favoriteCount)
+                    select {
+                        Article = article;
+                        FavoriteCount = favoriteCount;
+                        IsFavorited = false;
+                        IsFollowingAuthor = false
+                    }
                     exactlyOneOrDefault
                 }
             }
             
-    let getArticleWithFavorite (dbContext: ReadDataContext) =
+    let getArticleForUser (dbContext: ReadDataContext) =
         fun userId articleId ->
             async {
                 return query {
@@ -67,7 +80,46 @@ module ReadModelQueries =
                             where (favorite.UserId = userId)
                             count
                         }
-                    select (article, favoriteCount, isFavoriteQuery = 1)
+                    let isFollowingQuery =
+                        query {
+                            for f in dbContext.UsersFollowing do
+                            where (f.FollowerId = userId)
+                            count
+                        }
+                    select {
+                        Article = article;
+                        FavoriteCount = favoriteCount;
+                        IsFavorited = isFavoriteQuery = 1;
+                        IsFollowingAuthor = isFollowingQuery = 1
+                    }
                     exactlyOneOrDefault
                 }
             }
+            
+    let getUserProfileReadModel (dbContext: ReadDataContext) =
+        fun profileUserId requestingUserIdOption ->
+            match requestingUserIdOption with
+            | Some userId ->
+                async {
+                    return query {
+                        for u in dbContext.Users do
+                        where (u.Id = profileUserId)
+                        let isFollowingQuery =
+                            query {
+                                for f in dbContext.UsersFollowing do
+                                where (f.FollowerId = userId)
+                                count
+                            }
+                        select (u, isFollowingQuery = 1)
+                        exactlyOneOrDefault
+                    }
+                }
+            | None ->
+                async {
+                    return query {
+                        for u in dbContext.Users do
+                        where (u.Id = profileUserId)
+                        select (u, false)
+                        exactlyOneOrDefault
+                    }
+                }

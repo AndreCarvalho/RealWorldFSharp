@@ -3,7 +3,6 @@ namespace RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.Data
 open FsToolkit.ErrorHandling
 open Microsoft.AspNetCore.Identity
-open Microsoft.EntityFrameworkCore
 open RealWorldFSharp.Api.QueryModels
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.DataEntities
@@ -22,7 +21,6 @@ type UnfollowUserWorkflow(
             
             let userId = currentUserId |> (UserId.create "userId") |> valueOrException
             
-            dbContext.ChangeTracker.QueryTrackingBehavior <- QueryTrackingBehavior.NoTracking
             let! userFollowing = DataPipeline.getUserFollowing dbContext userId |> expectDataRelatedErrorAsync
             
             let (userFollowing, result) = removeFromUserFollowing userInfoToUnfollow.Id userFollowing

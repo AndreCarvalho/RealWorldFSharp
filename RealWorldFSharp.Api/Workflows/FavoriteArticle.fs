@@ -29,6 +29,6 @@ type FavoriteArticleWorkflow(
                 do! DataPipeline.addFavoriteArticle dbContext (userId, article.Id) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
             
-            let! (articleReadModel, favoriteCount) = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel favoriteCount true
+            let! articleQuery = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
+            return articleQuery |> QueryModels.toSingleArticleEnvelopeReadModel
         }

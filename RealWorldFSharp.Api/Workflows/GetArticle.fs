@@ -19,14 +19,10 @@ type GetArticleWorkflow (
             let! articleOption = DataPipeline.getArticle dbContext slug
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
-            let! (articleReadModel, favoriteCount, isFavorite) =
+            let! articleQuery =
                 match userIdOption with
-                | Some userId -> ReadModelQueries.getArticleWithFavorite readDataContext userId (article.Id.ToString())
-                | None ->
-                    async {
-                        let! (articleReadModel, favoriteCount) = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-                        return (articleReadModel, favoriteCount, false)
-                    }
+                | Some userId -> ReadModelQueries.getArticleForUser readDataContext userId (article.Id.ToString())
+                | None -> ReadModelQueries.getArticle readDataContext (article.Id.ToString())
                     
-            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel favoriteCount isFavorite
+            return articleQuery |> QueryModels.toSingleArticleEnvelopeReadModel
         }

@@ -5,6 +5,7 @@ open System.Collections.Generic
 open RealWorldFSharp.Domain.Articles
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Common
+open RealWorldFSharp.Data.Read.ReadModelQueries
 open RealWorldFSharp.Data.ReadModels
 
 module QueryModels =
@@ -116,31 +117,36 @@ module QueryModels =
         let envelope = toSimpleProfileModelEnvelope userInfo
         { envelope with Profile = userInfo |> toProfileModel userFollowing }
         
-    let toProfileModelReadModel (userEntity: UserEntity) =
+    let toProfileModelReadModel (userEntity: UserEntity) isFollowing =
         {
             Username = userEntity.Username
             Bio = userEntity.Bio
             Image = userEntity.ImageUrl
-            Following = false // todo
+            Following = isFollowing
         }
         
-    let toArticleModelReadModel favoriteCount isFavorite (article: ArticleEntity)  =
+    let toProfileModelReadModelEnvelope (userEntity:UserEntity, isFollowing) =
         {
-            Slug = article.Slug
-            Title = article.Title
-            Description = article.Description
-            Body = article.Body
-            TagList = article.Tags |> Seq.map (fun x -> x.Tag) |> Array.ofSeq
-            CreatedAt = article.CreatedAt
-            UpdatedAt = article.UpdatedAt
-            Favorited = isFavorite
-            FavoritesCount = favoriteCount
-            Author = toProfileModelReadModel article.User
+            Profile = toProfileModelReadModel userEntity isFollowing
         }
         
-    let toSingleArticleEnvelopeReadModel favoriteCount isFavorite article  =
+    let toArticleModelReadModel (articleQuery: ArticleQuery)  =
         {
-            Article = toArticleModelReadModel favoriteCount isFavorite article 
+            Slug = articleQuery.Article.Slug
+            Title = articleQuery.Article.Title
+            Description = articleQuery.Article.Description
+            Body = articleQuery.Article.Body
+            TagList = articleQuery.Article.Tags |> Seq.map (fun x -> x.Tag) |> Array.ofSeq
+            CreatedAt = articleQuery.Article.CreatedAt
+            UpdatedAt = articleQuery.Article.UpdatedAt
+            Favorited = articleQuery.IsFavorited
+            FavoritesCount = articleQuery.FavoriteCount
+            Author = toProfileModelReadModel articleQuery.Article.User articleQuery.IsFollowingAuthor
+        }
+        
+    let toSingleArticleEnvelopeReadModel articleQuery  =
+        {
+            Article = toArticleModelReadModel articleQuery 
         }
     
     let toCommentModel profileModel (comment: Comment) = 

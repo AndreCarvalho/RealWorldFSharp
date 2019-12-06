@@ -35,7 +35,7 @@ module QueryRepository =
             async {
                 try
                     let query = query {
-                        for f in dbContext.UsersFollowing do
+                        for f in dbContext.UsersFollowing.AsNoTracking() do
                         where (f.FollowerId = userId)
                         select f
                     }

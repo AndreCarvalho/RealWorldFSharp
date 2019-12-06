@@ -33,8 +33,6 @@ type UpdateArticleWorkflow (
             do! DataPipeline.updateArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            let! (articleReadModel, favoriteCount, isFavorite) =
-                ReadModelQueries.getArticleWithFavorite readDataContext userId.Value (article.Id.ToString())
-                
-            return articleReadModel |> QueryModels.toSingleArticleEnvelopeReadModel favoriteCount isFavorite
+            let! articleQuery = ReadModelQueries.getArticleForUser readDataContext userId.Value (article.Id.ToString())
+            return articleQuery |> QueryModels.toSingleArticleEnvelopeReadModel
         }
