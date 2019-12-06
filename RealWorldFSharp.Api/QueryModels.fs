@@ -115,26 +115,6 @@ module QueryModels =
     let toProfileModelEnvelope (userFollowing: UserFollowing) (userInfo: UserInfo)  =
         let envelope = toSimpleProfileModelEnvelope userInfo
         { envelope with Profile = userInfo |> toProfileModel userFollowing }
-
-//    let toArticleModel (profileModel: ProfileModel) (article: Article) =
-//        {
-//            Slug = article.Slug.Value
-//            Title = article.Title.Value
-//            Description = article.Description.Value
-//            Body = article.Body.Value
-//            TagList = article.Tags |> Array.ofList |> Array.map (fun x -> x.Value)
-//            CreatedAt = article.CreatedAt
-//            UpdatedAt = article.UpdatedAt
-//            Favorited = false //TODO
-//            FavoritesCount = 0 //TODO
-//            Author = profileModel
-//        }
-        
-//    let toSingleArticleEnvelope profileModel article =
-//        {
-//            Article = toArticleModel profileModel article
-//        }
-//        
         
     let toProfileModelReadModel (userEntity: UserEntity) =
         {
@@ -176,30 +156,19 @@ module QueryModels =
             Comment = toCommentModel profileModel comment
         }
         
-//    let toCommentsModelEnvelope commentAndProfilePairs =
-//        let commentsModel = commentAndProfilePairs |> List.map (fun (c, p) -> toCommentModel p c) |> Array.ofList 
-//        {
-//            Comments = commentsModel
-//        }
-        
-    let toCommentsModelEnvelope (userFollowing:UserFollowing option) (commentEntities: seq<ArticleCommentEntity>) =
+    let toCommentsReadModelEnvelope (commentEntities: seq<ArticleCommentEntity *  bool>) =
         {
             Comments = commentEntities
-                       |> Seq.map (fun c -> {
-                           Id = c.Id
-                           Body = c.Body
-                           CreatedAt = c.CreatedAt
-                           UpdatedAt = c.UpdatedAt
+                       |> Seq.map (fun (comment, isFollowing) -> {
+                           Id = comment.Id
+                           Body = comment.Body
+                           CreatedAt = comment.CreatedAt
+                           UpdatedAt = comment.UpdatedAt
                            Author = {
-                               Username = c.User.Username
-                               Bio = c.User.Bio
-                               Image = c.User.ImageUrl
-                               Following =
-                                   match userFollowing with
-                                   | Some uf ->
-                                        let authorUserId = c.UserId |> (UserId.create "userId") |> Errors.valueOrException                                       
-                                        uf.Following.Contains authorUserId
-                                   | None -> false
+                               Username = comment.User.Username
+                               Bio = comment.User.Bio
+                               Image = comment.User.ImageUrl
+                               Following = isFollowing
                            }
                        })
                        |> Array.ofSeq

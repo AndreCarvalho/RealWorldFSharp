@@ -20,6 +20,11 @@ module ReadModels =
         member val Bio: string = null with get, set
         member val ImageUrl: string = null with get, set
     
+    [<CLIMutable>]
+    type UserFollowingEntity = {
+        FollowerId: string
+        FollowedId: string
+    }
     
     [<Table("ArticleComments")>]
     type ArticleCommentEntity() =
@@ -70,12 +75,14 @@ module ReadModels =
         [<DefaultValue>] val mutable articleTags: DbSet<ArticleTagEntity>
         [<DefaultValue>] val mutable articles: DbSet<ArticleEntity>
         [<DefaultValue>] val mutable users: DbSet<UserEntity>
+        [<DefaultValue>] val mutable usersFollowing: DbSet<UserFollowingEntity>
         
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
             modelBuilder.Entity<ArticleEntity>().HasMany("Tags").WithOne().HasForeignKey("ArticleId") |> ignore
             modelBuilder.Entity<ArticleEntity>().HasMany("Favorited").WithOne().HasForeignKey("ArticleId") |> ignore
             modelBuilder.Entity<FavoriteArticleEntity>().HasKey("UserId", "ArticleId") |> ignore
+            modelBuilder.Entity<UserFollowingEntity>().HasKey("FollowerId", "FollowedId") |> ignore
 
         override x.SaveChangesAsync(_: bool, _: CancellationToken) =
             //Prevent writing with this context
@@ -99,5 +106,9 @@ module ReadModels =
             
         member x.Users
             with get() = x.users
-            and set v = x.users <- v
+            and set v = x.users <- v            
+        
+        member x.UsersFollowing
+            with get() = x.usersFollowing
+            and set v = x.usersFollowing <- v
 

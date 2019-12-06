@@ -5,15 +5,34 @@ open Microsoft.EntityFrameworkCore
 
 module ReadModelQueries =
     
-    let getCommentsForArticle (dbContext: ReadDataContext) (articleId:string) =
-        async {
-            return query {
-                for cs in dbContext.ArticleComments.Include("User") do
-                where (cs.ArticleId = articleId)
-                select cs
-            }
-        }
-        
+    let getCommentsForArticle (dbContext: ReadDataContext) =
+        fun userIdOption articleId ->
+            match userIdOption with
+            | Some userId ->
+                async {
+                    return query {
+                        for cs in dbContext.ArticleComments.Include("User") do
+                        where (cs.ArticleId = articleId)
+                        
+                        let followingQuery =
+                            query {
+                                for following in dbContext.UsersFollowing do
+                                where (following.FollowerId = userId && cs.UserId = following.FollowedId)
+                                count
+                            }
+                            
+                        select (cs, followingQuery = 1)
+                    }
+                }
+            | None ->
+                async {
+                    return query {
+                        for cs in dbContext.ArticleComments.Include("User") do
+                        where (cs.ArticleId = articleId)
+                        select (cs, false)
+                    }
+                }
+
     let getTags (dbContext: ReadDataContext) =
         async {
             return query {
