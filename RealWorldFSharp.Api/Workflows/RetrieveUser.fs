@@ -20,7 +20,7 @@ type RetrieveUserWorkflow (
                           ) =
     member __.Execute(username) =           
         asyncResult {
-            let! username = Username.create "username" username |> expectValidationError
+            let username = Username.create "username" username |> valueOrException
             let! userInfoOption = DataPipeline.getUserInfoByUsername userManager username 
             let! userInfo = noneToUserNotFoundError userInfoOption username.Value |> expectUsersError
             let token = userInfo |> Authentication.createToken jwtOptions.Value

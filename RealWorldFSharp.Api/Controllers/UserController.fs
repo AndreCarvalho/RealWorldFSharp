@@ -24,7 +24,6 @@ type UserController(
                         
         async {
             let! result = retrieveUserWorkflow.Execute userName
-            
             return result |> resultToActionResult self
         } |> Async.StartAsTask
         
