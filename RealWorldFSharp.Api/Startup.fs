@@ -24,7 +24,7 @@ type Startup private () =
 
     // This method gets called by the runtime. Use this method to add services to the container.
     member this.ConfigureServices(services: IServiceCollection) =
-        let connectionString = this.Configuration.GetValue<string>("ConnectionString")
+        let connectionString = this.Configuration.GetValue<string>("Database:ConnectionString")
         services.AddDbContext<ApplicationDbContext>(fun opt -> opt.UseSqlServer(connectionString) |> ignore) |> ignore
         services.AddDbContext<ReadDataContext>(fun opt -> opt.UseSqlServer(connectionString) |> ignore) |> ignore
         
@@ -59,9 +59,12 @@ type Startup private () =
         services.AddTransient<GetTagsWorkflow>() |> ignore
         services.AddTransient<FavoriteArticleWorkflow>() |> ignore
         services.AddTransient<UnfavoriteArticleWorkflow>() |> ignore
+        services.AddTransient<ListArticlesWorkflow>() |> ignore
         
         let jwtSection = this.Configuration.GetSection "JwtConfiguration"
-        services.Configure<JwtConfiguration> jwtSection |> ignore
+        services.Configure<JwtConfiguration> jwtSection |> ignore        
+        let connectionStringSection = this.Configuration.GetSection "Database"
+        services.Configure<Database> connectionStringSection |> ignore
         
         let jwtConfiguration = jwtSection.Get<JwtConfiguration>()
         let key = Encoding.ASCII.GetBytes jwtConfiguration.Secret

@@ -15,48 +15,52 @@ module DataEntities =
         member val Bio:string = null with get, set
         member val ImageUrl:string = null with get, set
         
-    [<CLIMutable>]
-    type UserFollowingEntity = {
-        FollowerId: string
-        FollowedId: string
-    }
+    and
+         [<AllowNullLiteral>]
+         UserFollowingEntity() = 
+            [<Required>] member val FollowerId: string = null with get, set
+            [<Required>] member val FollowedId: string = null with get, set
+            member val Follower: ApplicationUser = null with get, set
+            member val Followed: ApplicationUser = null with get, set
+
 
     [<AllowNullLiteral>]
     type ArticleTagEntity() =
-        [<Key>]
-        member val Id: int = 0 with get, set
-        member val ArticleId: string = null with get, set
-        member val Tag: string = null with get, set
+        [<Key>] member val Id: int = 0 with get, set
+        [<Required>] member val ArticleId: string = null with get, set
+        [<Required>] member val Tag: string = null with get, set
     and
         [<AllowNullLiteral>]
         ArticleEntity() =
-            [<Key>]
-            member val Id: string = null with get, set
-            member val Title: string = null with get, set
-            member val Slug: string = null with get, set
-            member val Description: string = null with get, set
-            member val Body: string = null with get, set
-            member val UserId: string = null with get, set
-            member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
-            member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+            [<Key>] member val Id: string = null with get, set
+            [<Required>] member val Title: string = null with get, set
+            [<Required>] member val Slug: string = null with get, set
+            [<Required>] member val Description: string = null with get, set
+            [<Required>] member val Body: string = null with get, set
+            [<Required>] member val UserId: string = null with get, set
+            [<Required>] member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+            [<Required>] member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
             member val Tags: List<ArticleTagEntity> = null with get, set
+            member val User: ApplicationUser = null with get, set
             
+
     [<AllowNullLiteral>]
     type ArticleCommentEntity() =
-        [<Key>]
-        member val Id: string = null with get, set
-        member val Body: string = null with get, set
-        member val ArticleId: string = null with get, set
-        member val UserId: string = null with get, set
-        member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
-        member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+        [<Key>] member val Id: string = null with get, set
+        [<Required>] member val Body: string = null with get, set
+        [<Required>] member val ArticleId: string = null with get, set
+        [<Required>] member val UserId: string = null with get, set
+        [<Required>] member val CreatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+        [<Required>] member val UpdatedAt: DateTimeOffset = DateTimeOffset.MinValue with get, set
+        member val Article: ArticleEntity = null with get, set
+        member val User: ApplicationUser = null with get, set
         
-    [<CLIMutable>]
     [<Table("ArticlesFavorited")>]
-    type FavoriteArticleEntity = {
-        UserId: string
-        ArticleId: string
-    }
+    type FavoriteArticleEntity() =
+        [<Required>] member val UserId: string = null with get, set
+        [<Required>] member val ArticleId: string = null with get, set
+        member val Article: ArticleEntity = null with get, set
+        member val User: ApplicationUser = null with get, set
     
     type ApplicationDbContext(options:DbContextOptions<ApplicationDbContext>) =
         inherit IdentityDbContext<ApplicationUser, IdentityRole, string>(options)
@@ -69,8 +73,18 @@ module DataEntities =
                 
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
+            let deleteBehavior = DeleteBehavior.Restrict
             modelBuilder.Entity<UserFollowingEntity>().HasKey("FollowerId", "FollowedId") |> ignore
+            modelBuilder.Entity<UserFollowingEntity>().HasOne("Follower").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
+            modelBuilder.Entity<UserFollowingEntity>().HasOne("Followed").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
+            
             modelBuilder.Entity<FavoriteArticleEntity>().HasKey("UserId", "ArticleId") |> ignore
+            
+            modelBuilder.Entity<ArticleCommentEntity>().HasOne("Article").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
+            modelBuilder.Entity<ArticleCommentEntity>().HasOne("User").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
+            
+            modelBuilder.Entity<FavoriteArticleEntity>().HasOne("Article").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
+            modelBuilder.Entity<FavoriteArticleEntity>().HasOne("User").WithMany().IsRequired().OnDelete(deleteBehavior) |> ignore
             
             modelBuilder.Entity<ArticleTagEntity>().HasOne<ArticleEntity>().WithMany().HasForeignKey("ArticleId") |> ignore
 

@@ -1,4 +1,5 @@
 namespace RealWorldFSharp.Common
+open System
 
 
 [<AutoOpen>]
@@ -30,6 +31,10 @@ module Nullable =
         
     let empty<'a when 'a: struct and 'a: (new: unit-> 'a) and 'a:> System.ValueType> =
         new Nullable<'a>()
+        
+    let defaultWith defaultVal (x: Nullable<'a>)  =
+        if x.HasValue then x.Value
+        else defaultVal
 
 [<RequireQualifiedAccess>]
 module Option =
@@ -37,3 +42,4 @@ module Option =
         match option with
         | Some v -> v
         | None -> failwith msg
+        

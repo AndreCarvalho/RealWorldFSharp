@@ -57,8 +57,14 @@ module QueryModels =
     }
     
     [<CLIMutable>]
-    type ArticleModelEnvelope = {
+    type SingleArticleModelEnvelope = {
         Article: ArticleModel
+    }
+    
+    [<CLIMutable>]
+    type MultipleArticlesModelEnvelope = {
+        Articles: ArticleModel array
+        ArticlesCount: int
     }
     
     [<CLIMutable>]
@@ -68,6 +74,15 @@ module QueryModels =
         CreatedAt: DateTimeOffset
         UpdatedAt: DateTimeOffset
         Author: ProfileModel
+    }
+    
+    [<CLIMutable>]
+    type ListArticlesQueryModel = {
+        Tag: string
+        Author: string
+        Favorited: string
+        Limit: Nullable<int>
+        Offset: Nullable<int>
     }
     
     type TagsModelEnvelope = {
@@ -124,6 +139,14 @@ module QueryModels =
             Image = userEntity.ImageUrl
             Following = isFollowing
         }
+                
+    let toProfileModelReadModel2 (user: User) isFollowing =
+        {
+            Username = user.Username
+            Bio = user.Bio
+            Image = user.ImageUrl
+            Following = isFollowing
+        }
         
     let toProfileModelReadModelEnvelope (userEntity:UserEntity, isFollowing) =
         {
@@ -144,9 +167,46 @@ module QueryModels =
             Author = toProfileModelReadModel articleQuery.Article.User articleQuery.IsFollowingAuthor
         }
         
+    let toArticleModelReadModel2 (article: Article, user: User, tags: string array, isFavorite: bool, favoriteCount:int, isFollowingAuthor: bool)  =
+        {
+            Slug = article.Slug
+            Title = article.Title
+            Description = article.Description
+            Body = article.Body
+            TagList = tags
+            CreatedAt = article.CreatedAt
+            UpdatedAt = article.UpdatedAt
+            Favorited = isFavorite
+            FavoritesCount = favoriteCount
+            Author = toProfileModelReadModel2 user isFollowingAuthor
+        }
+        
     let toSingleArticleEnvelopeReadModel articleQuery  =
         {
             Article = toArticleModelReadModel articleQuery 
+        }
+        
+    let toMultipleArticlesEnvelopeReadModel articles  =
+        let articles = articles |> Seq.map toArticleModelReadModel |> Array.ofSeq
+        {
+            Articles = articles
+            ArticlesCount = articles.Length
+        }
+            
+    let toMultipleArticlesEnvelopeReadModel2 (queryResult: ListArticlesQueryResult) =
+        let articles = 
+            queryResult.ArticlesAndAuthors
+            |> Seq.map (fun (article, author) -> 
+                let tags = queryResult.ArticlesTagsMap |> Map.find article.Id |> Array.ofSeq
+                let isFavorite = queryResult.UserFavoriteSet |> Set.contains article.Id
+                let isFollowing = queryResult.UserFollowingSet |> Set.contains author.Id
+                let favoriteCount = queryResult.FavoriteCountMap |> Map.tryFind article.Id |> Option.defaultValue 0
+                toArticleModelReadModel2 (article, author, tags, isFavorite, favoriteCount, isFollowing))
+            |> Array.ofSeq
+
+        {
+            Articles = articles
+            ArticlesCount = articles.Length
         }
     
     let toCommentModel profileModel (comment: Comment) = 

@@ -9,3 +9,10 @@ module Settings =
             Audience: string
             Issuer: string
         }
+        
+    [<CLIMutable>]   
+    type Database = {
+        ConnectionString: string
+    }
+        
+    

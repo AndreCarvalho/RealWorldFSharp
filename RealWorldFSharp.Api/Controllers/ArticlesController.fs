@@ -7,6 +7,7 @@ open RealWorldFSharp.Api
 open RealWorldFSharp.Api.Http
 open RealWorldFSharp.Api.Workflows
 open RealWorldFSharp.Api.CommandModels
+open RealWorldFSharp.Api.QueryModels
 
 [<Authorize>]
 [<ApiController>]
@@ -15,7 +16,8 @@ type ArticlesController (
                             createArticleWorkflow:CreateArticleWorkflow,
                             getArticleWorkflow: GetArticleWorkflow,
                             updateArticleWorkflow: UpdateArticleWorkflow,
-                            deleteArticleWorkflow: DeleteArticleWorkflow
+                            deleteArticleWorkflow: DeleteArticleWorkflow,
+                            listArticlesWorkflow: ListArticlesWorkflow
                         ) =
     inherit Controller()
     
@@ -57,6 +59,18 @@ type ArticlesController (
                         
         async {
             let! result = getArticleWorkflow.Execute(userId, articleSlug)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+    
+            
+    [<HttpGet>]
+    [<AllowAnonymous>]
+    [<Route("")>]
+    member self.ListArticles([<FromQuery>]queryParams: ListArticlesQueryModel) =
+        let userId = base.HttpContext |> Http.getUserIdOption
+       
+        async {
+            let! result = listArticlesWorkflow.Execute(userId, queryParams)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
     

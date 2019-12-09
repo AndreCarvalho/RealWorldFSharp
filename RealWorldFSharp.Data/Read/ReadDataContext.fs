@@ -9,6 +9,23 @@ open Microsoft.EntityFrameworkCore
 open System.Collections.Generic
 
 module ReadModels =
+
+    type Article = {
+        Id: string
+        Slug: string
+        Title: string
+        Description: string
+        Body: string
+        CreatedAt: DateTimeOffset
+        UpdatedAt: DateTimeOffset
+    }    
+    
+    type User = {
+        Id: string
+        Username: string
+        Bio: string
+        ImageUrl: string
+    }
     
     [<Table("AspNetUsers")>]
     [<AllowNullLiteral>]
@@ -75,6 +92,7 @@ module ReadModels =
         [<DefaultValue>] val mutable articles: DbSet<ArticleEntity>
         [<DefaultValue>] val mutable users: DbSet<UserEntity>
         [<DefaultValue>] val mutable usersFollowing: DbSet<UserFollowingEntity>
+        [<DefaultValue>] val mutable articlesFavorited: DbSet<FavoriteArticleEntity>
         
         override x.OnModelCreating(modelBuilder: ModelBuilder) =
             base.OnModelCreating modelBuilder
@@ -110,4 +128,8 @@ module ReadModels =
         member x.UsersFollowing
             with get() = x.usersFollowing
             and set v = x.usersFollowing <- v
+            
+        member x.ArticlesFavorited
+            with get() = x.articlesFavorited
+            and set v = x.articlesFavorited <- v
 

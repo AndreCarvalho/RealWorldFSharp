@@ -107,14 +107,14 @@ module DataPipeline =
     let addUserFollowing (dbContext: ApplicationDbContext) : AddUserFollowing =
         fun (followerId, followedId) ->
             asyncResult {
-                let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
+                let userFollowing = UserFollowingEntity(FollowerId = followerId.Value, FollowedId = followedId.Value)
                 do! CommandRepository.addUserFollowing dbContext userFollowing
             }
             
     let removeUserFollowing (dbContext: ApplicationDbContext) : RemoveUserFollowing =
         fun (followerId, followedId) ->
             asyncResult {
-                let userFollowing = {FollowerId = followerId.Value; FollowedId = followedId.Value}
+                let userFollowing = UserFollowingEntity(FollowerId = followerId.Value, FollowedId = followedId.Value)
                 do! CommandRepository.removeUserFollowing dbContext userFollowing
             }
             
@@ -177,13 +177,13 @@ module DataPipeline =
     let addFavoriteArticle (dbContext: ApplicationDbContext) : AddFavoriteArticle =
         fun (userId, articleId) ->
             asyncResult {
-                let favoriteArticle = {UserId = userId.Value; ArticleId = articleId.ToString()}
+                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = articleId.ToString())
                 do! CommandRepository.addFavoriteArticle dbContext favoriteArticle
             }
             
     let removeFavoriteArticle (dbContext: ApplicationDbContext) : RemoveFavoriteArticle =
         fun (userId, articleId) ->
             asyncResult {
-                let favoriteArticle = {UserId = userId.Value; ArticleId = articleId.ToString()}
+                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = articleId.ToString())
                 do! CommandRepository.removeFavoriteArticle dbContext favoriteArticle
             }

@@ -2,6 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
+        <DotnetFscCompilerPath />
     </PropertyGroup>
 
     <ItemGroup>
@@ -27,6 +28,7 @@
         <Compile Include="Workflows\GetTags.fs" />
         <Compile Include="Workflows\FavoriteArticle.fs" />
         <Compile Include="Workflows\UnfavoriteArticle.fs" />
+        <Compile Include="Workflows\ListArticles.fs" />
         <Compile Include="Controllers\UserRegistrationController.fs" />
         <Compile Include="Controllers\UserAuthenticationController.fs" />
         <Compile Include="Controllers\UserController.fs" />
@@ -49,6 +51,8 @@
       <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.0" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0" />
+      <PackageReference Include="SQLProvider" Version="1.1.75" />
+      <PackageReference Include="System.Data.SqlClient" Version="4.8.0" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.6.0" />
     </ItemGroup>
 
