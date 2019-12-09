@@ -209,7 +209,7 @@ module QueryModels =
             ArticlesCount = articles.Length
         }
     
-    let toCommentModel profileModel (comment: Comment) = 
+    let toCommentModel profileModel (comment: RealWorldFSharp.Domain.Articles.Comment) = 
         {
             Id = comment.Id.ToString()
             CreatedAt = comment.CreatedAt
@@ -217,22 +217,26 @@ module QueryModels =
             Body = comment.Body.Value
             Author = profileModel
         }
-    let toCommentModelEnvelope profileModel (comment: Comment) =
+    let toCommentModelEnvelope profileModel (comment: RealWorldFSharp.Domain.Articles.Comment) =
         {
             Comment = toCommentModel profileModel comment
         }
         
-    let toCommentsReadModelEnvelope (commentEntities: seq<ArticleCommentEntity *  bool>) =
+    let toCommentsReadModelEnvelope (commentsAndAuthors: (Comment * User) array, userFollowing) =
         {
-            Comments = commentEntities
-                       |> Seq.map (fun (comment, isFollowing) -> {
+            Comments = commentsAndAuthors
+                       |> Array.map (fun (comment, user) -> {
                            Id = comment.Id
                            Body = comment.Body
                            CreatedAt = comment.CreatedAt
                            UpdatedAt = comment.UpdatedAt
-                           Author = toProfileModelReadModel comment.User isFollowing
+                           Author = {
+                                Username = user.Username
+                                Bio = user.Bio
+                                Image = user.ImageUrl
+                                Following = userFollowing |> Set.contains user.Id
+                           }
                        })
-                       |> Array.ofSeq
         }
         
     let toTagsModelEnvelope tags =

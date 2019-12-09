@@ -27,6 +27,13 @@ module ReadModels =
         ImageUrl: string
     }
     
+    type Comment = {
+        Id: string
+        CreatedAt: DateTimeOffset
+        UpdatedAt: DateTimeOffset
+        Body: string
+    }
+    
     [<Table("AspNetUsers")>]
     [<AllowNullLiteral>]
     type UserEntity() =

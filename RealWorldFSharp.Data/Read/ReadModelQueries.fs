@@ -10,8 +10,7 @@ module ReadModelQueries =
     type SqlProvider  = SqlDataProvider<
                             Common.DatabaseProviderTypes.MSSQLSERVER,
                             "server=.\\SQLEXPRESS;database=RealWorldFSharp;Integrated security=SSPI",
-                            UseOptionTypes=false,
-                            ResolutionPath="C:\\Users\\andre\\.nuget\\packages\\system.data.sqlclient\\4.8.0\\lib\\netstandard2.0">
+                            UseOptionTypes=false>
     
     type ArticleQuery = {
         Article: ArticleEntity
@@ -36,42 +35,102 @@ module ReadModelQueries =
         UserFollowingSet: Set<string>
     }
     
-    let getCommentsForArticle (dbContext: ReadDataContext) =
-        fun userIdOption articleId ->
-            match userIdOption with
-            | Some userId ->
-                async {
-                    return query {
-                        for cs in dbContext.ArticleComments.Include("User") do
-                        where (cs.ArticleId = articleId)
-                        
-                        let followingQuery =
-                            query {
-                                for following in dbContext.UsersFollowing do
-                                where (following.FollowerId = userId && cs.UserId = following.FollowedId)
-                                count
-                            }
-                            
-                        select (cs, followingQuery = 1)
-                    }
-                }
-            | None ->
-                async {
-                    return query {
-                        for cs in dbContext.ArticleComments.Include("User") do
-                        where (cs.ArticleId = articleId)
-                        select (cs, false)
-                    }
-                }
-
-    let getTags (dbContext: ReadDataContext) =
-        async {
-            return query {
-                for tag in dbContext.ArticleTags do
-                select tag.Tag
-                distinct
-            }
+    let private mapArticle (record: SqlProvider.dataContext.``dbo.ArticlesEntity``) : ReadModels.Article =
+        {
+            Id = record.Id
+            Slug = record.Slug
+            Title = record.Title
+            Description = record.Description
+            Body = record.Body
+            CreatedAt = record.CreatedAt
+            UpdatedAt = record.UpdatedAt
+        }  
+    
+    let private mapUser (record: SqlProvider.dataContext.``dbo.AspNetUsersEntity``) : ReadModels.User =
+        {
+            Id = record.Id
+            Bio = record.Bio
+            Username = record.UserName
+            ImageUrl = record.ImageUrl
         }
+        
+    let private mapComment (record: SqlProvider.dataContext.``dbo.ArticleCommentsEntity``) : ReadModels.Comment =
+        {
+            Id = record.Id
+            Body = record.Body
+            CreatedAt = record.CreatedAt
+            UpdatedAt = record.UpdatedAt
+        }
+
+    let private getIsFollowing (ctx: SqlProvider.dataContext) userIdOption =
+        async {
+            let! x =
+                match userIdOption with
+                | Some userId ->
+                    query {
+                        for fol in ctx.Dbo.UsersFollowing do
+                        where (fol.FollowerId = userId)
+                        select fol.FollowedId
+                    } |> Array.executeQueryAsync
+                | None -> async {return [||]}
+            return x |> Set.ofArray
+        }
+    
+//    let getCommentsForArticle (dbContext: ReadDataContext) =
+//        fun userIdOption articleId ->
+//            match userIdOption with
+//            | Some userId ->
+//                async {
+//                    return query {
+//                        for cs in dbContext.ArticleComments.Include("User") do
+//                        where (cs.ArticleId = articleId)
+//                        
+//                        let followingQuery =
+//                            query {
+//                                for following in dbContext.UsersFollowing do
+//                                where (following.FollowerId = userId && cs.UserId = following.FollowedId)
+//                                count
+//                            }
+//                            
+//                        select (cs, followingQuery = 1)
+//                    }
+//                }
+//            | None ->
+//                async {
+//                    return query {
+//                        for cs in dbContext.ArticleComments.Include("User") do
+//                        where (cs.ArticleId = articleId)
+//                        select (cs, false)
+//                    }
+//                }
+
+    let getCommentsForArticle (connectionString: string) =
+        fun userIdOption articleId ->
+            async {
+                let ctx = SqlProvider.GetDataContext(connectionString)
+                
+                let! commentsQuery = 
+                    query {
+                        for comment in ctx.Dbo.ArticleComments do
+                        join author in ctx.Dbo.AspNetUsers on (comment.UserId = author.Id)
+                        where (comment.ArticleId = articleId)
+                        select (comment, author)
+                    } |> Array.executeQueryAsync
+                    
+                let! isFollowingSet = getIsFollowing ctx userIdOption
+                let mapped = commentsQuery |> Array.map (fun (comment, author) -> (mapComment comment, mapUser author))
+
+                return (mapped, isFollowingSet)
+            }
+
+    
+    let getTags (connectionString: string) =
+        let ctx = SqlProvider.GetDataContext(connectionString)
+        query {
+            for tag in ctx.Dbo.ArticleTags do
+            select tag.Tag
+            distinct
+        } |> Array.executeQueryAsync
         
     let getArticle (dbContext: ReadDataContext) =
         fun articleId ->
@@ -146,25 +205,6 @@ module ReadModelQueries =
                         exactlyOneOrDefault
                     }
                 }
-                
-    let private mapArticle (record: SqlProvider.dataContext.``dbo.ArticlesEntity``) : ReadModels.Article =
-        {
-            Id = record.Id
-            Slug = record.Slug
-            Title = record.Title
-            Description = record.Description
-            Body = record.Body
-            CreatedAt = record.CreatedAt
-            UpdatedAt = record.UpdatedAt
-        }  
-        
-    let private mapUser (record: SqlProvider.dataContext.``dbo.AspNetUsersEntity``) : ReadModels.User =
-        {
-            Id = record.Id
-            Bio = record.Bio
-            Username = record.UserName
-            ImageUrl = record.ImageUrl
-        }
 
     let listArticles (connectionString: string)  =
         fun userIdOption (queryParams: ListArticlesQueryParams) ->
@@ -247,16 +287,7 @@ module ReadModelQueries =
                         } |> Set.ofSeq
                     | None -> Set.empty
 
-                let isFollowingSet =
-                    match userIdOption with
-                    | Some userId ->
-                        query {
-                            for fol in ctx.Dbo.UsersFollowing do
-                            where (fol.FollowerId = userId)
-                            select fol.FollowedId
-                        } |> Set.ofSeq
-                    | None -> Set.empty
-
+                let! isFollowingSet = getIsFollowing ctx userIdOption
                 let mapped = articlesResults |> Seq.map (fun (article, author) -> (mapArticle article, mapUser author))
                 
                 return { 

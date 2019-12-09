@@ -1,12 +1,13 @@
 namespace RealWorldFSharp.Api.Workflows
 
+open Microsoft.Extensions.Options
 open RealWorldFSharp.Api
+open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.Read.ReadModels
 
-type GetTagsWorkflow (readDataContext: ReadDataContext) =
+type GetTagsWorkflow (databaseOptions: IOptions<Database>) =
     member __.Execute() =
         async {
-            let! tags = ReadModelQueries.getTags readDataContext
+            let! tags = ReadModelQueries.getTags databaseOptions.Value.ConnectionString
             return tags |> QueryModels.toTagsModelEnvelope
         }
