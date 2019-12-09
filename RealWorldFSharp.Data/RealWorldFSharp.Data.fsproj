@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="Read\ReadDataContext.fs" />
+        <Compile Include="Read\ReadModels.fs" />
         <Compile Include="Read\ReadModelQueries.fs" />
         <Compile Include="Write\DataEntities.fs" />
         <Compile Include="Write\DomainToEntityMapping.fs" />

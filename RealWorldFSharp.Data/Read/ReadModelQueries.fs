@@ -1,6 +1,6 @@
 namespace RealWorldFSharp.Data.Read
 
-open Microsoft.EntityFrameworkCore
+open FsToolkit.ErrorHandling
 open System.Linq
 open FSharp.Data.Sql
 open ReadModels
@@ -13,7 +13,9 @@ module ReadModelQueries =
                             UseOptionTypes=false>
     
     type ArticleQuery = {
-        Article: ArticleEntity
+        Article: Article
+        Author: User
+        Tags: string []
         FavoriteCount: int
         IsFavorited: bool
         IsFollowingAuthor: bool
@@ -75,35 +77,9 @@ module ReadModelQueries =
                 | None -> async {return [||]}
             return x |> Set.ofArray
         }
-    
-//    let getCommentsForArticle (dbContext: ReadDataContext) =
-//        fun userIdOption articleId ->
-//            match userIdOption with
-//            | Some userId ->
-//                async {
-//                    return query {
-//                        for cs in dbContext.ArticleComments.Include("User") do
-//                        where (cs.ArticleId = articleId)
-//                        
-//                        let followingQuery =
-//                            query {
-//                                for following in dbContext.UsersFollowing do
-//                                where (following.FollowerId = userId && cs.UserId = following.FollowedId)
-//                                count
-//                            }
-//                            
-//                        select (cs, followingQuery = 1)
-//                    }
-//                }
-//            | None ->
-//                async {
-//                    return query {
-//                        for cs in dbContext.ArticleComments.Include("User") do
-//                        where (cs.ArticleId = articleId)
-//                        select (cs, false)
-//                    }
-//                }
 
+    let getDataContext (connectionString: string) = SqlProvider.GetDataContext(connectionString)
+    
     let getCommentsForArticle (connectionString: string) =
         fun userIdOption articleId ->
             async {
@@ -122,95 +98,125 @@ module ReadModelQueries =
 
                 return (mapped, isFollowingSet)
             }
-
     
-    let getTags (connectionString: string) =
-        let ctx = SqlProvider.GetDataContext(connectionString)
+    let getTags (ctx: SqlProvider.dataContext) =
         query {
             for tag in ctx.Dbo.ArticleTags do
             select tag.Tag
             distinct
         } |> Array.executeQueryAsync
         
-    let getArticle (dbContext: ReadDataContext) =
-        fun articleId ->
-            async {
-                return query {
-                    for article in dbContext.Articles.Include("User").Include("Tags") do
-                    where (article.Id = articleId)
-                    let favoriteCount = article.Favorited.Count
-                    select {
-                        Article = article
-                        FavoriteCount = favoriteCount
-                        IsFavorited = false
-                        IsFollowingAuthor = false
-                    }
-                    exactlyOneOrDefault
+    let private getArticleQueryResult (ctx: SqlProvider.dataContext) =
+        fun userIdOption (article: SqlProvider.dataContext.``dbo.ArticlesEntity``) ->
+            let (article, author) =
+                query {
+                    for user in ctx.Dbo.AspNetUsers do
+                    where (user.Id = article.UserId)
+                    select (mapArticle article, mapUser user)
+                    exactlyOne
                 }
+                
+            let countFavorited = query {
+                for fav in ctx.Dbo.ArticlesFavorited do
+                where (fav.ArticleId = article.Id)
+                count
             }
             
-    let getArticleForUser (dbContext: ReadDataContext) =
-        fun userId articleId ->
-            async {
-                return query {
-                    for article in dbContext.Articles.Include("User").Include("Tags") do
-                    where (article.Id = articleId)
-                    let favoriteCount = article.Favorited.Count
-                    let isFavoriteQuery =
-                        query {
-                            for favorite in article.Favorited do
-                            where (favorite.UserId = userId)
-                            count
-                        }
-                    let isFollowingQuery =
-                        query {
-                            for f in dbContext.UsersFollowing do
-                            where (f.FollowerId = userId)
-                            count
-                        }
-                    select {
-                        Article = article;
-                        FavoriteCount = favoriteCount;
-                        IsFavorited = isFavoriteQuery = 1;
-                        IsFollowingAuthor = isFollowingQuery = 1
-                    }
-                    exactlyOneOrDefault
-                }
+            let getTagsQuery = query {
+                for tag in ctx.Dbo.ArticleTags do
+                where (tag.ArticleId = article.Id)
+                select tag.Tag
             }
             
-    let getUserProfileReadModel (dbContext: ReadDataContext) =
-        fun profileUserId requestingUserIdOption ->
-            match requestingUserIdOption with
+            let tags = getTagsQuery |> Array.ofSeq
+            
+            match userIdOption with
             | Some userId ->
-                async {
-                    return query {
-                        for u in dbContext.Users do
-                        where (u.Id = profileUserId)
-                        let isFollowingQuery =
-                            query {
-                                for f in dbContext.UsersFollowing do
-                                where (f.FollowerId = userId)
-                                count
-                            }
-                        select (u, isFollowingQuery = 1)
-                        exactlyOneOrDefault
+                let isFollowingQuery =
+                    query {
+                        for f in ctx.Dbo.UsersFollowing do
+                        where (f.FollowedId = author.Id && f.FollowerId = userId)
+                        count
                     }
-                }
-            | None ->
-                async {
-                    return query {
-                        for u in dbContext.Users do
-                        where (u.Id = profileUserId)
-                        select (u, false)
-                        exactlyOneOrDefault
+                let isFavoriteQuery =
+                    query {
+                        for favorite in ctx.Dbo.ArticlesFavorited do
+                        where (favorite.UserId = userId && favorite.ArticleId = article.Id)
+                        count
                     }
+                { 
+                    Article = article
+                    Author = author
+                    Tags = tags
+                    FavoriteCount = countFavorited
+                    IsFavorited = (isFavoriteQuery = 1)
+                    IsFollowingAuthor = (isFollowingQuery = 1)
                 }
+            | None -> { 
+                Article = article
+                Author = author
+                Tags = tags
+                FavoriteCount = countFavorited
+                IsFavorited = false 
+                IsFollowingAuthor = false
+            }
+            
+    let getArticleBySlug (ctx: SqlProvider.dataContext) =
+        fun userIdOption articleSlug ->
+            async {
+                let articleQuery = query {
+                    for article in ctx.Dbo.Articles do
+                    where (article.Slug = articleSlug)
+                    select article
+                    exactlyOneOrDefault
+                } // HACK: workaround to be able to map to option from nullable type
 
-    let listArticles (connectionString: string)  =
+                let articleOption = articleQuery |> Option.ofObj
+                return articleOption |> Option.map (getArticleQueryResult ctx userIdOption)
+            }
+            
+    let getArticleById (ctx: SqlProvider.dataContext) =
+        fun userIdOption articleId ->
+            async {
+                let articleQuery = query {
+                    for article in ctx.Dbo.Articles do
+                    where (article.Id = articleId)
+                    select article
+                    exactlyOneOrDefault
+                } // HACK: workaround to be able to map to option from nullable type
+
+                let articleOption = articleQuery |> Option.ofObj
+                return articleOption |> Option.map (getArticleQueryResult ctx userIdOption)
+            }
+
+
+    let getUserProfileReadModel (ctx: SqlProvider.dataContext) =
+        fun userIdOption profileUserName ->
+            async {
+                return
+                    query {
+                        for user in ctx.Dbo.AspNetUsers do
+                        where (user.UserName = profileUserName)
+                        select user
+                        exactlyOneOrDefault
+                    }
+                    |> Option.ofObj
+                    |> Option.map (fun user ->
+                        match userIdOption with
+                        | Some userId ->
+                            let isFollowingQuery =
+                                query {
+                                    for f in ctx.Dbo.UsersFollowing do
+                                    where (f.FollowedId = user.Id && f.FollowerId = userId)
+                                    count
+                                }
+                            (mapUser user, isFollowingQuery = 1)
+                        | None -> (mapUser user, false))
+            }
+
+    let listArticles (ctx: SqlProvider.dataContext)  =
         fun userIdOption (queryParams: ListArticlesQueryParams) ->
             async {
-                let ctx = SqlProvider.GetDataContext(connectionString)
-                
                 let articlesQuery = 
                     query {
                         for article in ctx.Dbo.Articles do

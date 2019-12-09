@@ -10,12 +10,10 @@ open RealWorldFSharp.Data.Read.ReadModels
 
 module QueryModels =
     
-    [<CLIMutable>]
     type Errors = {
         Errors: Dictionary<string, string array>
     }
     
-    [<CLIMutable>]
     type UserModel = {
         Username: string
         Email: string
@@ -24,12 +22,10 @@ module QueryModels =
         Image: string
     }
     
-    [<CLIMutable>]
     type UserModelEnvelope = {
         User: UserModel
     }
     
-    [<CLIMutable>]
     type ProfileModel = {
         Username: string
         Bio: string
@@ -37,12 +33,10 @@ module QueryModels =
         Following: bool
     }
     
-    [<CLIMutable>]
     type ProfileModelEnvelope = {
         Profile: ProfileModel
     }
     
-    [<CLIMutable>]
     type ArticleModel = {
         Slug: string
         Title: string
@@ -56,18 +50,15 @@ module QueryModels =
         Author : ProfileModel
     }
     
-    [<CLIMutable>]
     type SingleArticleModelEnvelope = {
         Article: ArticleModel
     }
     
-    [<CLIMutable>]
     type MultipleArticlesModelEnvelope = {
         Articles: ArticleModel array
         ArticlesCount: int
     }
     
-    [<CLIMutable>]
     type CommentModel = {
         Id: string
         Body: string
@@ -132,11 +123,11 @@ module QueryModels =
         let envelope = toSimpleProfileModelEnvelope userInfo
         { envelope with Profile = userInfo |> toProfileModel userFollowing }
         
-    let toProfileModelReadModel (userEntity: UserEntity) isFollowing =
+    let toProfileModelReadModel (user: User) isFollowing =
         {
-            Username = userEntity.Username
-            Bio = userEntity.Bio
-            Image = userEntity.ImageUrl
+            Username = user.Username
+            Bio = user.Bio
+            Image = user.ImageUrl
             Following = isFollowing
         }
                 
@@ -148,9 +139,9 @@ module QueryModels =
             Following = isFollowing
         }
         
-    let toProfileModelReadModelEnvelope (userEntity:UserEntity, isFollowing) =
+    let toProfileModelReadModelEnvelope (user: User, isFollowing) =
         {
-            Profile = toProfileModelReadModel userEntity isFollowing
+            Profile = toProfileModelReadModel2 user isFollowing
         }
         
     let toArticleModelReadModel (articleQuery: ArticleQuery)  =
@@ -159,12 +150,12 @@ module QueryModels =
             Title = articleQuery.Article.Title
             Description = articleQuery.Article.Description
             Body = articleQuery.Article.Body
-            TagList = articleQuery.Article.Tags |> Seq.map (fun x -> x.Tag) |> Array.ofSeq
+            TagList = articleQuery.Tags
             CreatedAt = articleQuery.Article.CreatedAt
             UpdatedAt = articleQuery.Article.UpdatedAt
             Favorited = articleQuery.IsFavorited
             FavoritesCount = articleQuery.FavoriteCount
-            Author = toProfileModelReadModel articleQuery.Article.User articleQuery.IsFollowingAuthor
+            Author = toProfileModelReadModel articleQuery.Author articleQuery.IsFollowingAuthor
         }
         
     let toArticleModelReadModel2 (article: Article, user: User, tags: string array, isFavorite: bool, favoriteCount:int, isFollowingAuthor: bool)  =
@@ -186,14 +177,7 @@ module QueryModels =
             Article = toArticleModelReadModel articleQuery 
         }
         
-    let toMultipleArticlesEnvelopeReadModel articles  =
-        let articles = articles |> Seq.map toArticleModelReadModel |> Array.ofSeq
-        {
-            Articles = articles
-            ArticlesCount = articles.Length
-        }
-            
-    let toMultipleArticlesEnvelopeReadModel2 (queryResult: ListArticlesQueryResult) =
+    let toMultipleArticlesEnvelopeReadModel (queryResult: ListArticlesQueryResult) =
         let articles = 
             queryResult.ArticlesAndAuthors
             |> Seq.map (fun (article, author) -> 
@@ -225,18 +209,14 @@ module QueryModels =
     let toCommentsReadModelEnvelope (commentsAndAuthors: (Comment * User) array, userFollowing) =
         {
             Comments = commentsAndAuthors
-                       |> Array.map (fun (comment, user) -> {
-                           Id = comment.Id
-                           Body = comment.Body
-                           CreatedAt = comment.CreatedAt
-                           UpdatedAt = comment.UpdatedAt
-                           Author = {
-                                Username = user.Username
-                                Bio = user.Bio
-                                Image = user.ImageUrl
-                                Following = userFollowing |> Set.contains user.Id
-                           }
-                       })
+                       |> Array.map (fun (comment, user) ->
+                           {
+                               Id = comment.Id
+                               Body = comment.Body
+                               CreatedAt = comment.CreatedAt
+                               UpdatedAt = comment.UpdatedAt
+                               Author = toProfileModelReadModel2 user (userFollowing |> Set.contains user.Id)
+                           })
         }
         
     let toTagsModelEnvelope tags =

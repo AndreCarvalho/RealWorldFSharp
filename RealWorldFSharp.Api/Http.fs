@@ -29,6 +29,7 @@ module Http =
         | DataError derr ->
             match derr with
             | EntityNotFound _ -> controller.NotFound() :> IActionResult
+            | DeleteError (en, id, msg) -> controller.Conflict(msg) :> IActionResult
             | _ -> failwith "Unexpected data error"
         | Bug ex -> failwith (ex.ToString())
     

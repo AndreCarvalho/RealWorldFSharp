@@ -1,5 +1,5 @@
 - Features
-    - list articles (with query params)
     - feed articles
 
 - Improve
+    - cascade deletes (articles with comments, for ex)

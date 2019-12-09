@@ -15,7 +15,6 @@ open RealWorldFSharp.Api.Workflows
 open Microsoft.AspNetCore.Authentication.JwtBearer
 open Microsoft.IdentityModel.Tokens
 open RealWorldFSharp.Data.Write.DataEntities
-open RealWorldFSharp.Data.Read.ReadModels
 
 type Startup private () =
     new (configuration: IConfiguration) as this =
@@ -26,7 +25,6 @@ type Startup private () =
     member this.ConfigureServices(services: IServiceCollection) =
         let connectionString = this.Configuration.GetValue<string>("Database:ConnectionString")
         services.AddDbContext<ApplicationDbContext>(fun opt -> opt.UseSqlServer(connectionString) |> ignore) |> ignore
-        services.AddDbContext<ReadDataContext>(fun opt -> opt.UseSqlServer(connectionString) |> ignore) |> ignore
         
         services.AddIdentity<ApplicationUser, IdentityRole>(fun opt ->
                 opt.User.RequireUniqueEmail <- true 

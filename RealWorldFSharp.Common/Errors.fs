@@ -14,6 +14,7 @@ module Errors =
         | EntityNotFound of entityName: string * id: string
         | EntityIsInUse of entityName: string * id: string
         | UpdateError of entityName:string * id: string * message:string
+        | DeleteError of entityName:string * id: string * message:string
         | GenericError of exn
 
     type UsersError =

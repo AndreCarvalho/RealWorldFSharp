@@ -121,9 +121,11 @@ module CommandRepository =
     let deleteArticle (dbContext: ApplicationDbContext) : DeleteArticle =
         fun articleEntity ->
             async {
-                do (dbContext.Articles.Remove articleEntity) |> ignore
-                return Ok ()
-                // TODO: handle ex?
+                try
+                    do (dbContext.Articles.Remove articleEntity) |> ignore
+                    return Ok ()
+                with
+                | ex -> return DeleteError("Article", articleEntity.Id, ex.Message) |> Error 
             }
             
     let addComment (dbContext: ApplicationDbContext) : AddComment =

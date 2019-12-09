@@ -2,19 +2,20 @@ namespace RealWorldFSharp.Api.Workflows
 
 open System
 open FsToolkit.ErrorHandling
+open Microsoft.Extensions.Options
+open RealWorldFSharp.Api
+open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Domain.Users
 open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Api.CommandModels
-open RealWorldFSharp.Api
 open RealWorldFSharp.Common.Errors
 open RealWorldFSharp.Data.Write
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.Read.ReadModels
 open RealWorldFSharp.Domain.Articles
 
 type CreateArticleWorkflow (
                                dbContext: ApplicationDbContext,
-                               readDataContext: ReadDataContext
+                               databaseOptions: IOptions<Database>
                            ) =
     member __.Execute(userId, command: CreateArticleCommandModel) =
         asyncResult {
@@ -28,6 +29,7 @@ type CreateArticleWorkflow (
             do! DataPipeline.addArticle dbContext article |> expectDataRelatedErrorAsync
             do! dbContext.SaveChangesAsync()
             
-            let! articleQuery = ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-            return articleQuery |> QueryModels.toSingleArticleEnvelopeReadModel
+            let context = ReadModelQueries.getDataContext databaseOptions.Value.ConnectionString
+            let! articleQuery = ReadModelQueries.getArticleById context (Some userId.Value) (article.Id.ToString())
+            return articleQuery.Value |> QueryModels.toSingleArticleEnvelopeReadModel
         }

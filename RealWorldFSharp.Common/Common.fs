@@ -24,8 +24,6 @@ module Common =
     
 [<RequireQualifiedAccess>]
 module Nullable =
-    open System
-    
     let from (a:'a) =
         new Nullable<'a>(a)
         

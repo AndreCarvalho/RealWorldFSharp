@@ -1,28 +1,19 @@
 namespace RealWorldFSharp.Api.Workflows
 
 open FsToolkit.ErrorHandling
+open Microsoft.Extensions.Options
 open RealWorldFSharp.Api
+open RealWorldFSharp.Api.Settings
 open RealWorldFSharp.Domain.Articles
-open RealWorldFSharp.Data.Write.DataEntities
 open RealWorldFSharp.Common.Errors
-open RealWorldFSharp.Data.Write
 open RealWorldFSharp.Data.Read
-open RealWorldFSharp.Data.Read.ReadModels
 
-type GetArticleWorkflow (
-                           dbContext: ApplicationDbContext,
-                           readDataContext: ReadDataContext
-                        ) =
+type GetArticleWorkflow (databaseOptions: IOptions<Database>) =
     member __.Execute(userIdOption, articleSlug) =           
         asyncResult {
             let slug = Slug.create articleSlug
-            let! articleOption = DataPipeline.getArticle dbContext slug
-            let! article = noneToError articleOption slug.Value |> expectDataRelatedError
-            
-            let! articleQuery =
-                match userIdOption with
-                | Some userId -> ReadModelQueries.getArticleForUser readDataContext userId (article.Id.ToString())
-                | None -> ReadModelQueries.getArticle readDataContext (article.Id.ToString())
-                    
+            let context = ReadModelQueries.getDataContext databaseOptions.Value.ConnectionString
+            let! articleQueryOption = ReadModelQueries.getArticleBySlug context userIdOption slug.Value 
+            let! articleQuery = noneToError articleQueryOption slug.Value |> expectDataRelatedError
             return articleQuery |> QueryModels.toSingleArticleEnvelopeReadModel
         }

@@ -9,13 +9,9 @@ open RealWorldFSharp.Common
 open RealWorldFSharp.Data.Read
 open RealWorldFSharp.Data.Read.ReadModelQueries
 
-type ListArticlesWorkflow(
-                             databaseOptions: IOptions<Database>
-                         ) =
+type ListArticlesWorkflow(databaseOptions: IOptions<Database>) =
     member __.Execute(userIdOption, queryModel: ListArticlesQueryModel) =
-        
         asyncResult {
-
             let queryParams = {
                 Tag = Option.ofObj queryModel.Tag
                 Author = Option.ofObj queryModel.Author
@@ -24,7 +20,7 @@ type ListArticlesWorkflow(
                 Offset = queryModel.Offset |> Nullable.defaultWith 0
             }            
 
-            
-            let! result = ReadModelQueries.listArticles databaseOptions.Value.ConnectionString userIdOption queryParams
-            return result |> QueryModels.toMultipleArticlesEnvelopeReadModel2
+            let context = ReadModelQueries.getDataContext databaseOptions.Value.ConnectionString
+            let! result = ReadModelQueries.listArticles context userIdOption queryParams
+            return result |> QueryModels.toMultipleArticlesEnvelopeReadModel
         }
