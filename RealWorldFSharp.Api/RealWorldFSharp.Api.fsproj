@@ -29,6 +29,7 @@
         <Compile Include="Workflows\UnfollowUser.fs" />
         <Compile Include="Workflows\UpdateArticle.fs" />
         <Compile Include="Workflows\UpdateUser.fs" />
+        <Compile Include="Workflows\FeedArticles.fs" />
         <Compile Include="Controllers\ArticlesController.fs" />
         <Compile Include="Controllers\CommentsController.fs" />
         <Compile Include="Controllers\FavoriteArticlesController.fs" />

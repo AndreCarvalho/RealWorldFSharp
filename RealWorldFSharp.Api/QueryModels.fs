@@ -76,6 +76,12 @@ module QueryModels =
         Offset: Nullable<int>
     }
     
+    [<CLIMutable>]
+    type FeedArticlesQueryModel = {
+        Limit: Nullable<int>
+        Offset: Nullable<int>
+    }
+    
     type TagsModelEnvelope = {
         Tags: string array
     }
@@ -184,6 +190,22 @@ module QueryModels =
                 let tags = queryResult.ArticlesTagsMap |> Map.find article.Id |> Array.ofSeq
                 let isFavorite = queryResult.UserFavoriteSet |> Set.contains article.Id
                 let isFollowing = queryResult.UserFollowingSet |> Set.contains author.Id
+                let favoriteCount = queryResult.FavoriteCountMap |> Map.tryFind article.Id |> Option.defaultValue 0
+                toArticleModelReadModel2 (article, author, tags, isFavorite, favoriteCount, isFollowing))
+            |> Array.ofSeq
+
+        {
+            Articles = articles
+            ArticlesCount = articles.Length
+        }
+        
+    let toFeedArticlesEnvelopeReadModel (queryResult: FeedArticlesQueryResult) =
+        let articles = 
+            queryResult.ArticlesAndAuthors
+            |> Seq.map (fun (article, author) -> 
+                let tags = queryResult.ArticlesTagsMap |> Map.find article.Id |> Array.ofSeq
+                let isFavorite = queryResult.UserFavoriteSet |> Set.contains article.Id
+                let isFollowing = true // by definition
                 let favoriteCount = queryResult.FavoriteCountMap |> Map.tryFind article.Id |> Option.defaultValue 0
                 toArticleModelReadModel2 (article, author, tags, isFavorite, favoriteCount, isFollowing))
             |> Array.ofSeq

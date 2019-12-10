@@ -28,6 +28,11 @@ module ReadModelQueries =
         Limit: int
         Offset: int
     }
+    
+    type FeedArticlesQueryParams = {
+        Limit: int
+        Offset: int
+    }
 
     type ListArticlesQueryResult = {
         ArticlesAndAuthors: seq<Article * User>
@@ -35,6 +40,13 @@ module ReadModelQueries =
         FavoriteCountMap: Map<string, int>
         UserFavoriteSet: Set<string>
         UserFollowingSet: Set<string>
+    }
+    
+    type FeedArticlesQueryResult = {
+        ArticlesAndAuthors: seq<Article * User>
+        ArticlesTagsMap: Map<string, string array>
+        FavoriteCountMap: Map<string, int>
+        UserFavoriteSet: Set<string>
     }
     
     let private mapArticle (record: SqlProvider.dataContext.``dbo.ArticlesEntity``) : ReadModels.Article =
@@ -105,6 +117,14 @@ module ReadModelQueries =
             select tag.Tag
             distinct
         } |> Array.executeQueryAsync
+        
+    let private getArticleTagsMap (ctx: SqlProvider.dataContext) =
+        fun (articleIds: string seq) ->
+            query {
+                for tag in ctx.Dbo.ArticleTags do
+                where (articleIds.Contains(tag.ArticleId))
+                select (tag.ArticleId, tag.Tag)
+            } |> Seq.toArray |> Array.groupBy (fun x -> fst x) |> Array.map (fun (k, v) -> (k, Array.map snd v)) |> Map.ofSeq
         
     let private getArticleQueryResult (ctx: SqlProvider.dataContext) =
         fun userIdOption (article: SqlProvider.dataContext.``dbo.ArticlesEntity``) ->
@@ -268,12 +288,7 @@ module ReadModelQueries =
 
                 let articleIds = articlesResults |> Array.map (fun (x,_) -> x.Id)
 
-                let articleTagsMap =
-                    query {
-                        for tag in ctx.Dbo.ArticleTags do
-                        where (articleIds.Contains(tag.ArticleId))
-                        select (tag.ArticleId, tag.Tag)
-                    } |> Seq.toArray |> Array.groupBy (fun x -> fst x) |> Array.map (fun (k, v) -> (k, Array.map snd v)) |> Map.ofSeq
+                let articleTagsMap = getArticleTagsMap ctx articleIds
                     
                 let favoriteCountMap =
                     query {
@@ -302,5 +317,48 @@ module ReadModelQueries =
                     FavoriteCountMap = favoriteCountMap 
                     UserFavoriteSet = isFavoriteSet 
                     UserFollowingSet = isFollowingSet
+                }
+            }
+
+    let feedArticles (ctx: SqlProvider.dataContext)  =
+        fun userId (queryParams: FeedArticlesQueryParams) ->
+            async {
+                let articlesQuery = 
+                    query {
+                        for article in ctx.Dbo.Articles do
+                        for author in article.``dbo.AspNetUsers by Id`` do
+                        for following in author.``dbo.UsersFollowing by Id`` do
+                        where (following.FollowerId = userId)
+                        sortByDescending article.CreatedAt
+                        select (mapArticle article, mapUser author)
+                        skip queryParams.Offset
+                        take queryParams.Limit
+                    }
+                    
+                let! articlesResults = articlesQuery |> Array.executeQueryAsync
+                let articleIds = articlesResults |> Array.map (fun (x,_) -> x.Id)
+                
+                let articleTagsMap = getArticleTagsMap ctx articleIds
+                    
+                let favoriteCountMap =
+                    query {
+                        for fav in ctx.Dbo.ArticlesFavorited do
+                        where (articleIds.Contains(fav.ArticleId))
+                        groupBy fav.ArticleId into g
+                        select (g.Key, g.Count())
+                    } |> Seq.toArray |> Map.ofSeq
+
+                let isFavoriteSet =
+                    query {
+                        for fav in ctx.Dbo.ArticlesFavorited do
+                        where (fav.UserId = userId)
+                        select fav.ArticleId
+                    } |> Set.ofSeq
+                
+                return { 
+                    ArticlesAndAuthors = articlesResults
+                    ArticlesTagsMap = articleTagsMap 
+                    FavoriteCountMap = favoriteCountMap 
+                    UserFavoriteSet = isFavoriteSet 
                 }
             }

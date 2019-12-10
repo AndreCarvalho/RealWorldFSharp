@@ -17,7 +17,8 @@ type ArticlesController (
                             getArticleWorkflow: GetArticleWorkflow,
                             updateArticleWorkflow: UpdateArticleWorkflow,
                             deleteArticleWorkflow: DeleteArticleWorkflow,
-                            listArticlesWorkflow: ListArticlesWorkflow
+                            listArticlesWorkflow: ListArticlesWorkflow,
+                            feedArticlesWorkflow: FeedArticlesWorkflow
                         ) =
     inherit Controller()
     
@@ -61,7 +62,6 @@ type ArticlesController (
             let! result = getArticleWorkflow.Execute(userId, articleSlug)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
-    
             
     [<HttpGet>]
     [<AllowAnonymous>]
@@ -71,6 +71,16 @@ type ArticlesController (
        
         async {
             let! result = listArticlesWorkflow.Execute(userId, queryParams)
+            return result |> resultToActionResult self
+        } |> Async.StartAsTask
+        
+    [<HttpGet>]
+    [<Route("feed")>]
+    member self.FeedArticles([<FromQuery>]queryParams: FeedArticlesQueryModel) =
+        let userId = base.HttpContext |> Http.getUserId
+       
+        async {
+            let! result = feedArticlesWorkflow.Execute(userId, queryParams)
             return result |> resultToActionResult self
         } |> Async.StartAsTask
     
