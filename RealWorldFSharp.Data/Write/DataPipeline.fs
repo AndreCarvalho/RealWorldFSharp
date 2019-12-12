@@ -28,8 +28,8 @@ module DataPipeline =
     type GetComment = CommentId -> IoQueryResult<Comment>
     type DeleteComment = Comment -> IoResult<unit>
     type GetFavoriteArticles = UserId -> IoResult<FavoriteArticles>
-    type AddFavoriteArticle = (UserId * ArticleId) -> IoResult<unit>
-    type RemoveFavoriteArticle = (UserId * ArticleId) -> IoResult<unit>
+    type AddFavoriteArticle = (UserId * Article) -> IoResult<unit>
+    type RemoveFavoriteArticle = (UserId * Article) -> IoResult<unit>
     
     let registerNewUser (userManager: UserManager<ApplicationUser>) : RegisterNewUser =
         fun (userInfo, password) ->
@@ -175,15 +175,15 @@ module DataPipeline =
             }
             
     let addFavoriteArticle (dbContext: ApplicationDbContext) : AddFavoriteArticle =
-        fun (userId, articleId) ->
+        fun (userId, article) ->
             asyncResult {
-                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = articleId.ToString())
+                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = article.Id.ToString())
                 do! CommandRepository.addFavoriteArticle dbContext favoriteArticle
             }
             
     let removeFavoriteArticle (dbContext: ApplicationDbContext) : RemoveFavoriteArticle =
-        fun (userId, articleId) ->
+        fun (userId, article) ->
             asyncResult {
-                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = articleId.ToString())
+                let favoriteArticle = FavoriteArticleEntity(UserId = userId.Value, ArticleId = article.Id.ToString())
                 do! CommandRepository.removeFavoriteArticle dbContext favoriteArticle
             }

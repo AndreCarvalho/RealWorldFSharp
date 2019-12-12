@@ -24,10 +24,10 @@ type UnfavoriteArticleWorkflow(
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
             let! favoriteArticles = DataPipeline.getFavoriteArticles dbContext userId |> expectDataRelatedErrorAsync
-            let result = favoriteArticles |> removeFromFavorites article.Id
+            let result = favoriteArticles |> removeFromFavorites article
             
             if result = Remove then
-                do! DataPipeline.removeFavoriteArticle dbContext (userId, article.Id) |> expectDataRelatedErrorAsync
+                do! DataPipeline.removeFavoriteArticle dbContext (userId, article) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
             
             let context = ReadModelQueries.getDataContext databaseOptions.Value.ConnectionString

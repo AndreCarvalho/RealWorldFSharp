@@ -102,12 +102,12 @@ module Articles =
     type AddFavoriteResult = Add | AlreadyPresent
     type RemoveFavoriteResult = Remove | NotPresent
     
-    let addToFavorites articleId favoriteArticles =
-        if not <| favoriteArticles.Favorites.Contains articleId then Add
+    let addToFavorites (article: Article) favoriteArticles =
+        if not <| favoriteArticles.Favorites.Contains article.Id then Add
         else AlreadyPresent           
     
-    let removeFromFavorites articleId favoriteArticles =
-        if favoriteArticles.Favorites.Contains articleId then Remove
+    let removeFromFavorites (article: Article) favoriteArticles =
+        if favoriteArticles.Favorites.Contains article.Id then Remove
         else NotPresent
             
     let simpleCreateSlug  (dateTime:DateTimeOffset) (title: Title) =

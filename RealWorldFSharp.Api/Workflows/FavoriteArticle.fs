@@ -24,10 +24,10 @@ type FavoriteArticleWorkflow(
             let! article = noneToError articleOption slug.Value |> expectDataRelatedError
             
             let! favoriteArticles = DataPipeline.getFavoriteArticles dbContext userId |> expectDataRelatedErrorAsync
-            let result = favoriteArticles |> addToFavorites article.Id
+            let result = favoriteArticles |> addToFavorites article
             
             if result = Add then
-                do! DataPipeline.addFavoriteArticle dbContext (userId, article.Id) |> expectDataRelatedErrorAsync
+                do! DataPipeline.addFavoriteArticle dbContext (userId, article) |> expectDataRelatedErrorAsync
                 do! dbContext.SaveChangesAsync()
             
             let context = ReadModelQueries.getDataContext databaseOptions.Value.ConnectionString
